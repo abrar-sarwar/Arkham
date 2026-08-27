@@ -11,6 +11,7 @@ import os
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from math import isfinite
 from pathlib import Path
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -22,6 +23,8 @@ VALID_LLM_PROVIDERS = ("openai", "anthropic", "gemini", "template")
 VALID_DELIVERY_PROVIDERS = ("discord", "twilio")
 DEFAULT_DELIVERY_PROVIDER = "discord"
 DEFAULT_GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
+DEFAULT_LLM_TIMEOUT_SECONDS = 180.0
+MAX_LLM_TIMEOUT_SECONDS = 300.0
 DEFAULT_MIN_PRIORITY = 35.0
 MAX_LOOKBACK_HOURS = 168
 #: Character budget quoted to the analyst model for the Discord brief (no SMS compression needed).
@@ -148,6 +151,7 @@ class Settings:
 
     llm_provider: str = "openai"
     llm_model: str | None = None
+    llm_timeout_seconds: float = DEFAULT_LLM_TIMEOUT_SECONDS
     openai_api_key: str | None = None
     openai_base_url: str | None = None
     anthropic_api_key: str | None = None
@@ -229,6 +233,14 @@ class Settings:
             problems.append("ARKHAM_DELIVERY_HOUR must be between 0 and 23.")
         if self.llm_provider not in VALID_LLM_PROVIDERS:
             problems.append(f"LLM_PROVIDER must be one of {', '.join(VALID_LLM_PROVIDERS)} (got {self.llm_provider!r}).")
+        if (
+            not isfinite(self.llm_timeout_seconds)
+            or self.llm_timeout_seconds < 1
+            or self.llm_timeout_seconds > MAX_LLM_TIMEOUT_SECONDS
+        ):
+            problems.append(
+                f"ARKHAM_LLM_TIMEOUT_SECONDS must be between 1 and {MAX_LLM_TIMEOUT_SECONDS:g}."
+            )
         if self.delivery_provider not in VALID_DELIVERY_PROVIDERS:
             problems.append(
                 f"ARKHAM_DELIVERY_PROVIDER must be one of {', '.join(VALID_DELIVERY_PROVIDERS)} "
@@ -334,6 +346,7 @@ class Settings:
             ]
         return lines + [
             f"llm_provider={self.llm_provider} llm_model={self.llm_model or '<unset>'} "
+            f"llm_timeout={self.llm_timeout_seconds:g}s "
             f"openai_key={'set' if self.openai_api_key else '<unset>'} "
             f"anthropic_key={'set' if self.anthropic_api_key else '<unset>'} "
             f"gemini_key={'set' if self.gemini_api_key else '<unset>'}",
@@ -390,6 +403,9 @@ def load_settings(env: Mapping[str, str] | None = None, *, dotenv_path: str | os
         nvd_api_key=get("NVD_API_KEY"),
         llm_provider=(get("LLM_PROVIDER") or "openai").lower(),
         llm_model=get("LLM_MODEL"),
+        llm_timeout_seconds=_env_float(
+            get("ARKHAM_LLM_TIMEOUT_SECONDS"), DEFAULT_LLM_TIMEOUT_SECONDS
+        ),
         openai_api_key=get("OPENAI_API_KEY"),
         openai_base_url=get("OPENAI_BASE_URL"),
         anthropic_api_key=get("ANTHROPIC_API_KEY"),

@@ -44,6 +44,7 @@ jobs:
       NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
       LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
       LLM_MODEL: ${{ vars.LLM_MODEL }}
+      ARKHAM_LLM_TIMEOUT_SECONDS: ${{ vars.ARKHAM_LLM_TIMEOUT_SECONDS || '180' }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_BASE_URL: ${{ vars.GEMINI_BASE_URL }}
       # To use another analyst provider (openai/anthropic), add its key here as a secret and set LLM_PROVIDER.

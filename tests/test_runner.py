@@ -10,6 +10,9 @@ from types import SimpleNamespace
 import pytest
 
 from arkham.config import load_settings, mask_webhook_url
+from arkham.intelligence import synthesize as synthesis
+from arkham.intelligence.llm.base import IntelligenceModel, ModelError, TransientModelError
+from arkham.intelligence.llm.template import TemplateModel
 from arkham.models import (
     Briefing,
     BriefingDraft,
@@ -35,6 +38,7 @@ from arkham.models import (
     StoredEvent,
 )
 from arkham.runner import Components, RunOptions, execute_run
+from arkham.security.validation import validate_draft
 from arkham.storage.base import Storage
 
 NOW = datetime(2026, 8, 26, 12, 0, tzinfo=timezone.utc)
@@ -128,6 +132,24 @@ class Harness:
     provider: FakeProvider
     calls: dict[str, int]
     components: Components
+
+
+class ScriptedGeminiModel(IntelligenceModel):
+    provider = "gemini"
+    model = "gemini-test"
+
+    def __init__(self, failures: list[ModelError] | None = None) -> None:
+        self.failures = list(failures or [])
+        self.calls = 0
+
+    def synthesize(self, evidence: EvidencePack) -> ModelOutput:
+        self.calls += 1
+        if self.failures:
+            raise self.failures.pop(0)
+        output = TemplateModel().synthesize(evidence)
+        return output.model_copy(
+            update={"usage": LLMUsage(provider=self.provider, model=self.model, calls=1)}
+        )
 
 
 def build_components(*, ok_sources: int = 5, events: list[CyberEvent] | None = None, select_all: bool = True,
@@ -275,6 +297,136 @@ def test_missing_llm_config_fails_before_collection():
     outcome = execute_run(settings, RunOptions(dry_run=True), storage=MemoryStorage(), now=NOW, components=h.components)
     assert outcome.run.status == "failed" and "LLM_MODEL" in outcome.run.error
     assert h.calls["collect"] == 0
+
+
+def test_missing_gemini_key_fails_before_collection_without_fallback():
+    settings = load_settings(
+        {"LLM_PROVIDER": "gemini", "LLM_MODEL": "gemini-test"}, dotenv_path=None
+    )
+    h = build_components()
+    outcome = execute_run(
+        settings,
+        RunOptions(dry_run=True),
+        storage=MemoryStorage(),
+        now=NOW,
+        components=h.components,
+    )
+    assert outcome.run.status == "failed" and "GEMINI_API_KEY" in outcome.run.error
+    assert h.calls["collect"] == 0
+    assert outcome.briefing is None
+
+
+def test_exhausted_transient_gemini_failure_falls_back_and_delivers_grounded_briefing(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    settings = load_settings(
+        {
+            "DISCORD_WEBHOOK_URL": WEBHOOK,
+            "LLM_PROVIDER": "gemini",
+            "LLM_MODEL": "gemini-test",
+            "GEMINI_API_KEY": "test-key",
+        },
+        dotenv_path=None,
+    )
+    primary = ScriptedGeminiModel(
+        [TransientModelError("HTTP 503") for _ in range(4)]
+    )
+    built: list[str] = []
+    sleeps: list[float] = []
+    h = build_components()
+
+    def build_model(current_settings, _http):
+        built.append(current_settings.llm_provider)
+        return TemplateModel() if current_settings.llm_provider == "template" else primary
+
+    h.components.build_model = build_model
+    h.components.synthesize = synthesis.synthesize
+    h.components.validate_draft = validate_draft
+    monkeypatch.setattr(synthesis, "_sleep", sleeps.append)
+
+    outcome = execute_run(
+        settings, RunOptions(), storage=MemoryStorage(), now=NOW, components=h.components
+    )
+
+    assert outcome.run.status == "success" and outcome.sent
+    assert primary.calls == 4 and sleeps == [2.0, 8.0, 20.0]
+    assert built == ["gemini", "template"]
+    assert outcome.briefing is not None
+    assert outcome.briefing.generated_by == "template (fallback)"
+    assert validate_draft(outcome.briefing.draft, outcome.pack, settings.max_events) == []
+    assert all(
+        item.ref in outcome.pack.refs
+        and item.source_url in {source.url for source in outcome.pack.refs[item.ref].sources}
+        for item in outcome.briefing.draft.items
+    )
+    assert len(h.provider.sent) == 1
+    assert "analyst fallback: template" in caplog.text
+
+
+def test_successful_gemini_synthesis_does_not_build_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = load_settings(
+        {
+            "LLM_PROVIDER": "gemini",
+            "LLM_MODEL": "gemini-test",
+            "GEMINI_API_KEY": "test-key",
+        },
+        dotenv_path=None,
+    )
+    primary = ScriptedGeminiModel()
+    built: list[str] = []
+    h = build_components()
+
+    def build_model(current_settings, _http):
+        built.append(current_settings.llm_provider)
+        return TemplateModel() if current_settings.llm_provider == "template" else primary
+
+    h.components.build_model = build_model
+    h.components.synthesize = synthesis.synthesize
+    monkeypatch.setattr(synthesis, "_sleep", lambda _delay: None)
+
+    outcome = execute_run(
+        settings,
+        RunOptions(dry_run=True),
+        storage=MemoryStorage(),
+        now=NOW,
+        components=h.components,
+    )
+
+    assert outcome.run.status == "success"
+    assert built == ["gemini"] and primary.calls == 1
+    assert outcome.briefing is not None and outcome.briefing.generated_by == primary.label
+
+
+def test_non_transient_gemini_failure_does_not_fall_back_or_deliver() -> None:
+    settings = load_settings(
+        {
+            "DISCORD_WEBHOOK_URL": WEBHOOK,
+            "LLM_PROVIDER": "gemini",
+            "LLM_MODEL": "invalid-model",
+            "GEMINI_API_KEY": "test-key",
+        },
+        dotenv_path=None,
+    )
+    primary = ScriptedGeminiModel([ModelError("invalid model")])
+    built: list[str] = []
+    h = build_components()
+
+    def build_model(current_settings, _http):
+        built.append(current_settings.llm_provider)
+        return TemplateModel() if current_settings.llm_provider == "template" else primary
+
+    h.components.build_model = build_model
+    h.components.synthesize = synthesis.synthesize
+
+    outcome = execute_run(
+        settings, RunOptions(), storage=MemoryStorage(), now=NOW, components=h.components
+    )
+
+    assert outcome.run.status == "failed" and "invalid model" in outcome.run.error
+    assert built == ["gemini"] and primary.calls == 1
+    assert h.provider.sent == [] and outcome.briefing is None
 
 
 def test_missing_delivery_config_blocks_live_run_but_not_dry_run():

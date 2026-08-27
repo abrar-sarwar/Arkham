@@ -20,7 +20,9 @@ MAX_REDIRECTS = 5
 
 
 class HttpError(Exception):
-    pass
+    def __init__(self, message: str, *, transient: bool = False) -> None:
+        super().__init__(message)
+        self.transient = transient
 
 
 class ResponseTooLarge(HttpError):
@@ -169,7 +171,10 @@ class SafeHttpClient:
             except httpx.TimeoutException as exc:
                 raise HttpTimeout(f"Timeout after {timeout_seconds or self.timeout_seconds}s fetching {current}") from exc
             except httpx.HTTPError as exc:
-                raise HttpError(f"HTTP transport error for {current}: {exc.__class__.__name__}: {exc}") from exc
+                raise HttpError(
+                    f"HTTP transport error for {current}: {exc.__class__.__name__}: {exc}",
+                    transient=True,
+                ) from exc
         raise HttpError(f"Too many redirects fetching {url}")
 
     def get(self, url: str, **kwargs: object) -> HttpResponse:

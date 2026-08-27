@@ -10,12 +10,13 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from datetime import timezone
 from urllib.parse import urlsplit
 
 from pydantic import ValidationError
 
-from arkham.intelligence.llm.base import IntelligenceModel, ModelError
+from arkham.intelligence.llm.base import IntelligenceModel, ModelError, TransientModelError
 from arkham.models import (
     AttackTechnique,
     BriefingDraft,
@@ -32,6 +33,11 @@ from arkham.security.prompt_injection import UNTRUSTED_EVIDENCE_NOTICE, sanitize
 from arkham.security.urls import UrlValidationError, canonicalize_url, validate_public_url
 
 log = logging.getLogger(__name__)
+
+MODEL_MAX_ATTEMPTS = 4
+MODEL_RETRY_DELAYS_SECONDS = (2.0, 8.0, 20.0)
+MODEL_MAX_RETRY_AFTER_SECONDS = 30.0
+_sleep = time.sleep
 
 MAX_EVIDENCE_ITEMS = 10
 MAX_SOURCES_PER_ITEM = 4
@@ -413,19 +419,58 @@ def estimate_tokens(text: str) -> int:
 
 
 def synthesize(pack: EvidencePack, model: IntelligenceModel) -> ModelOutput:
-    """Ask the analyst model for a draft; retry once on :class:`ModelError`; aggregate usage across attempts."""
+    """Ask the analyst model for a draft; retry only transient outages with bounded backoff."""
     usage = LLMUsage(provider=model.provider, model=model.model)
-    last: ModelError | None = None
-    for attempt in (1, 2):
+    for attempt in range(1, MODEL_MAX_ATTEMPTS + 1):
         try:
             output = model.synthesize(pack)
-        except ModelError as exc:
-            last = exc
+        except TransientModelError as exc:
             carried = getattr(exc, "usage", None)
             if isinstance(carried, LLMUsage):
                 usage.add(carried)
-            log.warning("analyst model %s failed (attempt %d/2): %s", model.label, attempt, exc)
+            if attempt == MODEL_MAX_ATTEMPTS:
+                log.warning(
+                    "analyst model %s transient failure (attempt %d/%d): %s; retry budget exhausted",
+                    model.label,
+                    attempt,
+                    MODEL_MAX_ATTEMPTS,
+                    exc,
+                )
+                raise TransientModelError(
+                    f"analyst model {model.label} failed after {MODEL_MAX_ATTEMPTS} attempts: {exc}",
+                    usage=usage,
+                ) from exc
+            delay = _model_retry_delay(exc, attempt)
+            log.warning(
+                "analyst model %s transient failure (attempt %d/%d): %s; retrying in %.1fs",
+                model.label,
+                attempt,
+                MODEL_MAX_ATTEMPTS,
+                exc,
+                delay,
+            )
+            _sleep(delay)
             continue
+        except ModelError as exc:
+            carried = getattr(exc, "usage", None)
+            if isinstance(carried, LLMUsage):
+                usage.add(carried)
+            log.warning(
+                "analyst model %s non-transient failure (attempt %d/%d): %s; not retrying",
+                model.label,
+                attempt,
+                MODEL_MAX_ATTEMPTS,
+                exc,
+            )
+            raise ModelResponseError(
+                f"analyst model {model.label} failed with a non-transient error: {exc}", usage=usage
+            ) from exc
         usage.add(output.usage)
         return ModelOutput(draft=output.draft, raw_text=output.raw_text, usage=usage)
-    raise ModelResponseError(f"analyst model {model.label} failed after 2 attempts: {last}", usage=usage) from last
+    raise AssertionError("unreachable")  # pragma: no cover
+
+
+def _model_retry_delay(exc: TransientModelError, attempt: int) -> float:
+    if exc.retry_after_seconds is not None:
+        return min(exc.retry_after_seconds, MODEL_MAX_RETRY_AFTER_SECONDS)
+    return MODEL_RETRY_DELAYS_SECONDS[attempt - 1]

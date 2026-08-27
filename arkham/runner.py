@@ -11,13 +11,14 @@ import logging
 import time
 import uuid
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from arkham.config import ConfigError, Settings
 from arkham.costs import compute_costs
 from arkham.http import SafeHttpClient
+from arkham.intelligence.llm.base import TransientModelError
 from arkham.models import (
     Briefing,
     CostMetrics,
@@ -288,9 +289,26 @@ def execute_run(
         outcome.pack = pack
         run.evidence_items = len(pack.items)
 
-        # ---- synthesize (one model call) and validate (fail closed)
+        # ---- synthesize (bounded retries; grounded template fallback for transient Gemini outage)
         model = c.build_model(settings, http)
-        output = c.synthesize(pack, model)
+        generated_by = model.label
+        try:
+            output = c.synthesize(pack, model)
+        except TransientModelError as exc:
+            if model.provider != "gemini":
+                raise
+            log.warning(
+                "analyst model %s exhausted transient retries; analyst fallback: template",
+                model.label,
+            )
+            fallback_model = c.build_model(replace(settings, llm_provider="template"), http)
+            output = c.synthesize(pack, fallback_model)
+            generated_by = f"{fallback_model.label} (fallback)"
+            prior_usage = getattr(exc, "usage", None)
+            if isinstance(prior_usage, LLMUsage):
+                combined_usage = prior_usage.model_copy(deep=True)
+                combined_usage.add(output.usage)
+                output = output.model_copy(update={"usage": combined_usage})
         usage: LLMUsage = output.usage
         run.llm_calls, run.llm_tokens_in, run.llm_tokens_out = usage.calls, usage.input_tokens, usage.output_tokens
         draft = output.draft
@@ -298,7 +316,7 @@ def execute_run(
         problems = c.validate_draft(draft, pack, max_events=settings.max_events)
         if problems:
             raise ValidationFailure(list(problems))
-        briefing = c.render_briefing(settings, draft, pack, generated_by=model.label, now=now)
+        briefing = c.render_briefing(settings, draft, pack, generated_by=generated_by, now=now)
         if notes:
             briefing.validation_notes.extend(notes if isinstance(notes, list) else [str(notes)])
         problems = c.validate_rendered(briefing, pack, max_chars=settings.rendered_size_limit)

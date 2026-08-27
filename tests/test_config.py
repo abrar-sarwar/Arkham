@@ -13,6 +13,8 @@ def test_load_settings_defaults_from_empty_env():
     assert s.max_sms_chars == 900
     assert s.min_priority_score == 35.0
     assert s.llm_provider == "openai"
+    assert s.llm_timeout_seconds == 180.0
+    assert s.http_timeout_seconds == 20.0
     assert s.sms_emoji is False
     assert s.crawl_enabled is True
     assert s.crawl_global_concurrency == 6
@@ -23,6 +25,23 @@ def test_load_settings_defaults_from_empty_env():
     assert s.crawl_browser_concurrency == 1
     assert s.crawl_retries == 2
     assert s.crawl_max_text_chars == 50_000
+
+
+def test_load_settings_reads_llm_timeout_without_changing_source_timeout() -> None:
+    settings = load_settings({"ARKHAM_LLM_TIMEOUT_SECONDS": "240"}, dotenv_path=None)
+    assert settings.llm_timeout_seconds == 240.0
+    assert settings.http_timeout_seconds == 20.0
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "301", "nan"])
+def test_out_of_range_llm_timeout_is_rejected(value: str) -> None:
+    with pytest.raises(ConfigError, match="ARKHAM_LLM_TIMEOUT_SECONDS"):
+        load_settings({"ARKHAM_LLM_TIMEOUT_SECONDS": value}, dotenv_path=None)
+
+
+def test_non_numeric_llm_timeout_is_rejected_cleanly() -> None:
+    with pytest.raises(ConfigError, match="Expected a number"):
+        load_settings({"ARKHAM_LLM_TIMEOUT_SECONDS": "slow"}, dotenv_path=None)
 
 
 def test_load_settings_reads_crawl_limits() -> None:

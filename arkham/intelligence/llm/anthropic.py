@@ -5,24 +5,29 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from arkham.http import SafeHttpClient
-from arkham.intelligence.llm.base import IntelligenceModel, ModelError
+from arkham.http import HttpError, HttpStatusError, HttpTimeout, SafeHttpClient
+from arkham.intelligence.llm.base import (
+    TRANSIENT_MODEL_HTTP_STATUSES,
+    IntelligenceModel,
+    ModelError,
+    TransientModelError,
+)
 from arkham.intelligence.synthesize import SYSTEM_PROMPT, build_user_prompt, parse_model_json
 from arkham.models import EvidencePack, LLMUsage, ModelOutput
 
 MESSAGES_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
 MAX_RESPONSE_BYTES = 2_000_000
-REQUEST_TIMEOUT_SECONDS = 90.0
 
 
 class AnthropicModel(IntelligenceModel):
     provider = "anthropic"
 
-    def __init__(self, *, model: str, api_key: str, http: SafeHttpClient) -> None:
+    def __init__(self, *, model: str, api_key: str, http: SafeHttpClient, timeout_seconds: float) -> None:
         self.model = model
         self._api_key = api_key
         self._http = http
+        self._timeout_seconds = timeout_seconds
 
     def synthesize(self, evidence: EvidencePack) -> ModelOutput:
         payload = {
@@ -42,7 +47,7 @@ class AnthropicModel(IntelligenceModel):
                 },
                 json=payload,
                 max_bytes=MAX_RESPONSE_BYTES,
-                timeout_seconds=REQUEST_TIMEOUT_SECONDS,
+                timeout_seconds=self._timeout_seconds,
             )
             data = json.loads(response.body)
             text = _content(data)
@@ -61,6 +66,21 @@ class AnthropicModel(IntelligenceModel):
             )
         except ModelError:
             raise
+        except HttpTimeout as exc:
+            raise TransientModelError("Anthropic model request timed out") from exc
+        except HttpStatusError as exc:
+            message = f"Anthropic model request failed: HTTP {exc.status_code}"
+            if exc.status_code in TRANSIENT_MODEL_HTTP_STATUSES:
+                raise TransientModelError(
+                    message, retry_after_seconds=exc.retry_after_seconds()
+                ) from exc
+            raise ModelError(message) from exc
+        except HttpError as exc:
+            if exc.transient:
+                raise TransientModelError(
+                    f"Anthropic model transport failed: {exc.__class__.__name__}"
+                ) from exc
+            raise ModelError(f"Anthropic model request failed: {exc.__class__.__name__}") from exc
         except Exception as exc:
             raise ModelError(f"Anthropic model request failed: {exc.__class__.__name__}") from exc
 

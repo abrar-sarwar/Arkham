@@ -9,7 +9,7 @@ import feedparser
 import pytest
 
 from arkham.intelligence import synthesize as syn
-from arkham.intelligence.llm.base import IntelligenceModel, ModelError
+from arkham.intelligence.llm.base import IntelligenceModel, ModelError, TransientModelError
 from arkham.models import (
     AttackTechnique,
     Attribution,
@@ -598,26 +598,31 @@ def test_synthesize_returns_first_success_without_retry() -> None:
     assert len(out.draft.items) == 2
 
 
-def test_synthesize_retries_once_after_model_error_and_aggregates_usage() -> None:
+def test_synthesize_retries_transient_error_and_aggregates_usage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     pack = build_pack(all_events())
-    failed = syn.ModelResponseError(
-        "model returned invalid JSON",
+    failed = TransientModelError(
+        "provider unavailable",
         usage=LLMUsage(provider="scripted", model="unit-test", calls=1, input_tokens=90, output_tokens=15),
     )
     model = _ScriptedModel([failed, _output(pack)])
+    sleeps: list[float] = []
+    monkeypatch.setattr(syn, "_sleep", sleeps.append)
     out = syn.synthesize(pack, model)
     assert model.calls == 2
+    assert sleeps == [2.0]
     assert out.usage.calls == 2
     assert out.usage.input_tokens == 190
     assert out.usage.output_tokens == 55
 
 
-def test_synthesize_gives_up_after_second_failure() -> None:
+def test_synthesize_does_not_retry_non_transient_model_error() -> None:
     pack = build_pack(all_events())
-    model = _ScriptedModel([ModelError("HTTP 500"), ModelError("HTTP 502")])
-    with pytest.raises(ModelError, match="HTTP 502"):
+    model = _ScriptedModel([ModelError("invalid model"), _output(pack)])
+    with pytest.raises(ModelError, match="invalid model"):
         syn.synthesize(pack, model)
-    assert model.calls == 2
+    assert model.calls == 1
 
 
 def test_synthesize_does_not_catch_unexpected_exceptions() -> None:

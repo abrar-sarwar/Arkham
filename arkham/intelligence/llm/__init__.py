@@ -23,6 +23,7 @@ def build_model(settings: Settings, http: SafeHttpClient) -> IntelligenceModel:
             model=settings.llm_model,
             api_key=settings.openai_api_key,
             http=http,
+            timeout_seconds=settings.llm_timeout_seconds,
             base_url=settings.openai_base_url,
         )
     if settings.llm_provider == "gemini":
@@ -37,13 +38,20 @@ def build_model(settings: Settings, http: SafeHttpClient) -> IntelligenceModel:
             model=settings.llm_model,
             api_key=settings.gemini_api_key,
             http=http,
+            timeout_seconds=settings.llm_timeout_seconds,
             base_url=settings.gemini_base_url or DEFAULT_GEMINI_BASE_URL,
             provider="gemini",
+            reasoning_effort="low",
         )
     if settings.llm_provider == "anthropic":
         from arkham.intelligence.llm.anthropic import AnthropicModel
 
         if not settings.llm_model or not settings.anthropic_api_key:
             raise ConfigError("Anthropic model configuration is incomplete")
-        return AnthropicModel(model=settings.llm_model, api_key=settings.anthropic_api_key, http=http)
+        return AnthropicModel(
+            model=settings.llm_model,
+            api_key=settings.anthropic_api_key,
+            http=http,
+            timeout_seconds=settings.llm_timeout_seconds,
+        )
     raise ConfigError(f"Unsupported LLM provider {settings.llm_provider!r}")
