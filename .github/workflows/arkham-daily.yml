@@ -71,7 +71,7 @@ jobs:
       # Actions cache. Keys are unique per run; restore-keys picks the most recent previous state, which
       # is also what a rerun of a delivered run sees — so the 20-hour delivery guard holds across reruns.
       - name: Restore state
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: data
           key: arkham-state-${{ github.run_id }}
@@ -105,7 +105,7 @@ jobs:
 
       - name: Save state
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: data
           key: arkham-state-${{ github.run_id }}
