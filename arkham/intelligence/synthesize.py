@@ -11,6 +11,7 @@ import json
 import logging
 import re
 import time
+from collections import Counter
 from datetime import timezone
 from urllib.parse import urlsplit
 
@@ -80,6 +81,14 @@ class ModelResponseError(ModelError):
     def __init__(self, message: str, *, usage: LLMUsage | None = None) -> None:
         super().__init__(message)
         self.usage = usage
+
+
+class SynthesisContractError(ModelResponseError):
+    """The model could not be reconciled with the ranked EvidencePack contract."""
+
+
+class _RankedRefsError(ValueError):
+    """Draft refs are not a safe permutation of the expected ranked prefix."""
 
 
 # --------------------------------------------------------------------------------------
@@ -319,8 +328,10 @@ SYSTEM_PROMPT: str = (
     "6. Sections: CRITICAL for KEV-listed, actively exploited or zero-day vulnerabilities; THREAT for threat-actor or "
     "malware campaigns; INCIDENT for breaches and ransomware; RESEARCH for research, tooling and technique write-ups; "
     "POLICY for sanctions, indictments, takedowns and regulation.\n"
-    "7. Brevity: headline <= 140 characters, why_it_matters <= 160 characters, plain text, no markdown, no emoji. "
-    "Order items by priority_score and never exceed the item limit or the character budget.\n"
+    "7. The evidence array is already ranked. Preserve its exact order and never re-rank it: if you return K items, "
+    "their refs MUST be the contiguous prefix E1 through EK. Brevity: headline <= 140 characters, "
+    "why_it_matters <= 160 characters, plain text, no markdown, no emoji. Never exceed the item limit or the "
+    "character budget.\n"
     "8. prep: 2-4 defensive, educational actions grounded in the evidence (patch X, review control Y, learn "
     "technique Z). Never write offensive or exploitation instructions.\n"
     "9. learn: exactly one concept. Set technique_id ONLY if that id appears in the evidence techniques, otherwise "
@@ -335,12 +346,16 @@ SYSTEM_PROMPT: str = (
 def build_user_prompt(pack: EvidencePack) -> str:
     """The per-run user message: budget, tagged evidence JSON, output schema, closing instruction."""
     evidence = json.dumps(pack.model_dump(mode="json"), indent=1, ensure_ascii=False)
+    ranked_identities = json.dumps(_ranked_identities(pack), indent=1)
     return "\n".join(
         [
             f"DATE: {pack.date_label}",
             f"CHARACTER BUDGET: {pack.max_chars} characters for the whole rendered brief; use short event cards.",
             f"MAX ITEMS: {pack.max_events}",
             f"SOURCES: {pack.sources_ok}/{pack.sources_checked} responded; {pack.events_analyzed} events analyzed.",
+            "RANKED EVIDENCE IDENTITIES (fixed order; do not re-rank or change these mappings):",
+            ranked_identities,
+            "ITEM ORDER CONTRACT: return only a contiguous ranked prefix (E1, E2, ... EK) in this exact order.",
             "<evidence>",
             evidence,
             "</evidence>",
@@ -349,6 +364,43 @@ def build_user_prompt(pack: EvidencePack) -> str:
             "Return the JSON object only. No prose, no markdown fences, JSON only.",
         ]
     )
+
+
+def build_repair_prompt(
+    pack: EvidencePack,
+    draft: BriefingDraft,
+    *,
+    contract_error: str,
+) -> str:
+    """Build a one-shot, structure-only repair request tied to the same ranked evidence identities."""
+    evidence = json.dumps(pack.model_dump(mode="json"), indent=1, ensure_ascii=False)
+    prior = json.dumps(draft.model_dump(mode="json"), indent=1, ensure_ascii=False)
+    ranked_identities = json.dumps(_ranked_identities(pack), indent=1)
+    return "\n".join(
+        [
+            "REFORMAT ONLY. This is not a fresh synthesis request.",
+            f"CONTRACT ERROR: {contract_error}",
+            "The previous JSON used invalid item ordering or references.",
+            "You may only reorder or drop complete existing item objects. Do not add an item, create a missing card, "
+            "change a ref, or change any item field or factual text.",
+            "Copy prep, learn, and watch exactly. Do not add, remove, or rewrite claims.",
+            "The returned items must be a contiguous ranked prefix E1 through EK in exact order. On a non-quiet "
+            "brief, at least E1 must remain.",
+            "RANKED REF TO EVENT_ID MAP (fixed):",
+            ranked_identities,
+            "<evidence>",
+            evidence,
+            "</evidence>",
+            "<previous_draft>",
+            prior,
+            "</previous_draft>",
+            "Return the reformatted JSON object only. No prose, no markdown fences, JSON only.",
+        ]
+    )
+
+
+def _ranked_identities(pack: EvidencePack) -> list[dict[str, str]]:
+    return [{"ref": item.ref, "event_id": item.event_id} for item in pack.items]
 
 
 # --------------------------------------------------------------------------------------
@@ -413,6 +465,95 @@ def estimate_tokens(text: str) -> int:
     return len(text) // 4
 
 
+def _reconcile_ranked_draft(pack: EvidencePack, draft: BriefingDraft) -> tuple[BriefingDraft, bool]:
+    """Return a safely ordered draft, or reject anything beyond a pure prefix permutation."""
+    refs = [item.ref for item in draft.items]
+    if not refs and pack.items and not pack.quiet:
+        raise _RankedRefsError("non-quiet draft omitted every ranked evidence item")
+
+    expected = [item.ref for item in pack.items[: len(refs)]]
+    if refs == expected:
+        return draft, False
+
+    duplicates = sorted(ref for ref, count in Counter(refs).items() if count > 1)
+    if duplicates:
+        raise _RankedRefsError(f"duplicate evidence refs: {', '.join(duplicates)}")
+
+    unknown = sorted(set(refs) - set(pack.refs))
+    if unknown:
+        raise _RankedRefsError(f"unknown evidence refs: {', '.join(unknown)}")
+
+    if len(refs) == len(expected) and set(refs) == set(expected):
+        by_ref = {item.ref: item for item in draft.items}
+        ordered = [by_ref[ref] for ref in expected]
+        return draft.model_copy(update={"items": ordered}), True
+
+    raise _RankedRefsError(
+        f"draft refs skipped ranked evidence or contain a gap: got {refs!r}; expected prefix {expected!r}"
+    )
+
+
+def _assert_repair_only_reformatted(original: BriefingDraft, repaired: BriefingDraft) -> None:
+    """Reject repair output that adds or rewrites any synthesized content."""
+    if (
+        repaired.prep != original.prep
+        or repaired.learn != original.learn
+        or repaired.watch != original.watch
+    ):
+        raise _RankedRefsError("repair changed synthesized content outside event cards")
+
+    def card_counts(draft: BriefingDraft) -> Counter[str]:
+        return Counter(
+            json.dumps(item.model_dump(mode="json"), sort_keys=True, ensure_ascii=False)
+            for item in draft.items
+        )
+
+    if card_counts(repaired) - card_counts(original):
+        raise _RankedRefsError("repair changed synthesized content or added an event card")
+
+
+def _repair_ranked_output(
+    pack: EvidencePack,
+    model: IntelligenceModel,
+    output: ModelOutput,
+    usage: LLMUsage,
+    contract_error: _RankedRefsError,
+) -> ModelOutput:
+    """Ask Gemini once to reformat an unsafe draft, then enforce the operation locally."""
+    log.warning(
+        "analyst model %s ranked evidence contract failed; repair attempted: %s",
+        model.label,
+        contract_error,
+    )
+    try:
+        repaired = model.repair(pack, output.draft, contract_error=str(contract_error))
+    except ModelError as exc:
+        carried = getattr(exc, "usage", None)
+        if isinstance(carried, LLMUsage):
+            usage.add(carried)
+        log.warning("analyst model %s repair failed: %s", model.label, exc)
+        raise SynthesisContractError(
+            f"analyst model {model.label} ranked evidence contract repair failed: {exc}",
+            usage=usage,
+        ) from exc
+
+    usage.add(repaired.usage)
+    try:
+        _assert_repair_only_reformatted(output.draft, repaired.draft)
+        draft, reordered = _reconcile_ranked_draft(pack, repaired.draft)
+    except _RankedRefsError as exc:
+        log.warning("analyst model %s repair failed: %s", model.label, exc)
+        raise SynthesisContractError(
+            f"analyst model {model.label} ranked evidence contract repair failed: {exc}",
+            usage=usage,
+        ) from exc
+
+    if reordered:
+        log.warning("analyst model %s repaired draft reordered locally to ranked evidence prefix", model.label)
+    log.warning("analyst model %s repair succeeded", model.label)
+    return ModelOutput(draft=draft, raw_text=repaired.raw_text, usage=usage)
+
+
 # --------------------------------------------------------------------------------------
 # Entry point
 # --------------------------------------------------------------------------------------
@@ -466,7 +607,15 @@ def synthesize(pack: EvidencePack, model: IntelligenceModel) -> ModelOutput:
                 f"analyst model {model.label} failed with a non-transient error: {exc}", usage=usage
             ) from exc
         usage.add(output.usage)
-        return ModelOutput(draft=output.draft, raw_text=output.raw_text, usage=usage)
+        if model.provider != "gemini":
+            return ModelOutput(draft=output.draft, raw_text=output.raw_text, usage=usage)
+        try:
+            draft, reordered = _reconcile_ranked_draft(pack, output.draft)
+        except _RankedRefsError as exc:
+            return _repair_ranked_output(pack, model, output, usage, exc)
+        if reordered:
+            log.warning("analyst model %s draft reordered locally to ranked evidence prefix", model.label)
+        return ModelOutput(draft=draft, raw_text=output.raw_text, usage=usage)
     raise AssertionError("unreachable")  # pragma: no cover
 
 

@@ -14,6 +14,8 @@ from arkham.models import (
     AttackTechnique,
     Attribution,
     BriefingDraft,
+    BriefItem,
+    BriefSection,
     ClaimFlag,
     Confidence,
     CyberEvent,
@@ -588,6 +590,66 @@ def _output(pack: EvidencePack, *, tokens_in: int = 100, tokens_out: int = 40) -
     return ModelOutput(draft=draft, raw_text=json.dumps(valid_draft_dict(pack)), usage=usage)
 
 
+def _output_with_refs(
+    pack: EvidencePack,
+    refs: list[str],
+    *,
+    tokens_in: int = 100,
+    tokens_out: int = 40,
+) -> ModelOutput:
+    items = []
+    for ref in refs:
+        evidence = pack.refs.get(ref, pack.items[0])
+        source = evidence.sources[0]
+        items.append(
+            BriefItem(
+                ref=ref,
+                section=BriefSection.CRITICAL,
+                headline=f"Card for {ref}",
+                why_it_matters=f"Grounded context for {ref}.",
+                confidence=evidence.confidence,
+                source_label=source.label,
+                source_url=source.url,
+            )
+        )
+    draft = BriefingDraft(items=items, prep=["Review the selected evidence"], watch=[])
+    usage = LLMUsage(
+        provider="gemini",
+        model="gemini-test",
+        calls=1,
+        input_tokens=tokens_in,
+        output_tokens=tokens_out,
+    )
+    return ModelOutput(draft=draft, raw_text=draft.model_dump_json(), usage=usage)
+
+
+class _RepairingGeminiModel(IntelligenceModel):
+    provider = "gemini"
+    model = "gemini-test"
+
+    def __init__(self, initial: ModelOutput, repair: ModelOutput | Exception) -> None:
+        self.initial = initial
+        self.repair_step = repair
+        self.calls = 0
+        self.repair_calls = 0
+
+    def synthesize(self, evidence: EvidencePack) -> ModelOutput:
+        self.calls += 1
+        return self.initial
+
+    def repair(
+        self,
+        evidence: EvidencePack,
+        draft: BriefingDraft,
+        *,
+        contract_error: str,
+    ) -> ModelOutput:
+        self.repair_calls += 1
+        if isinstance(self.repair_step, Exception):
+            raise self.repair_step
+        return self.repair_step
+
+
 def test_synthesize_returns_first_success_without_retry() -> None:
     pack = build_pack(all_events())
     model = _ScriptedModel([_output(pack)])
@@ -596,6 +658,103 @@ def test_synthesize_returns_first_success_without_retry() -> None:
     assert out.usage.calls == 1 and out.usage.input_tokens == 100 and out.usage.output_tokens == 40
     assert out.usage.provider == "scripted" and out.usage.model == "unit-test"
     assert len(out.draft.items) == 2
+
+
+def test_synthesize_accepts_correct_ranked_gemini_prefix_without_repair() -> None:
+    pack = build_pack(all_events())
+    model = _RepairingGeminiModel(
+        _output_with_refs(pack, ["E1", "E2"]),
+        ModelError("repair must not be called"),
+    )
+
+    out = syn.synthesize(pack, model)
+
+    assert [item.ref for item in out.draft.items] == ["E1", "E2"]
+    assert model.calls == 1
+    assert model.repair_calls == 0
+
+
+def test_synthesize_reorders_exact_unique_prefix_locally_without_repair(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    pack = build_pack(all_events())
+    model = _RepairingGeminiModel(
+        _output_with_refs(pack, ["E2", "E1"]),
+        ModelError("repair must not be called"),
+    )
+
+    out = syn.synthesize(pack, model)
+
+    assert [item.ref for item in out.draft.items] == ["E1", "E2"]
+    assert [item.headline for item in out.draft.items] == ["Card for E1", "Card for E2"]
+    assert model.repair_calls == 0
+    assert "reordered locally" in caplog.text
+
+
+def test_synthesize_gap_uses_one_grounded_repair_and_accepts_safe_prefix(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    pack = build_pack(all_events())
+    initial = _output_with_refs(pack, ["E1", "E3"], tokens_in=120, tokens_out=30)
+    repaired = _output_with_refs(pack, ["E1"], tokens_in=80, tokens_out=15)
+    model = _RepairingGeminiModel(initial, repaired)
+
+    out = syn.synthesize(pack, model)
+
+    assert [item.ref for item in out.draft.items] == ["E1"]
+    assert out.draft.items[0] == initial.draft.items[0]
+    assert model.calls == 1
+    assert model.repair_calls == 1
+    assert (out.usage.calls, out.usage.input_tokens, out.usage.output_tokens) == (2, 200, 45)
+    assert "repair attempted" in caplog.text
+    assert "repair succeeded" in caplog.text
+
+
+def test_synthesize_duplicate_ref_is_not_locally_accepted_and_one_failed_repair_stops(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    pack = build_pack(all_events())
+    invalid = _output_with_refs(pack, ["E1", "E1"])
+    model = _RepairingGeminiModel(invalid, invalid)
+
+    with pytest.raises(ModelError, match="ranked evidence contract"):
+        syn.synthesize(pack, model)
+
+    assert model.calls == 1
+    assert model.repair_calls == 1
+    assert "repair attempted" in caplog.text
+    assert "repair failed" in caplog.text
+    assert "reordered locally" not in caplog.text
+
+
+def test_synthesize_unknown_ref_is_not_locally_accepted_and_one_failed_repair_stops(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    pack = build_pack(all_events())
+    invalid = _output_with_refs(pack, ["E1", "E99"])
+    model = _RepairingGeminiModel(invalid, invalid)
+
+    with pytest.raises(ModelError, match="ranked evidence contract"):
+        syn.synthesize(pack, model)
+
+    assert model.calls == 1
+    assert model.repair_calls == 1
+    assert "repair attempted" in caplog.text
+    assert "repair failed" in caplog.text
+    assert "reordered locally" not in caplog.text
+
+
+def test_synthesize_rejects_repair_that_changes_grounded_card_content() -> None:
+    pack = build_pack(all_events())
+    initial = _output_with_refs(pack, ["E1", "E3"])
+    changed = _output_with_refs(pack, ["E1"])
+    changed.draft.items[0].headline = "A newly synthesized claim"
+    model = _RepairingGeminiModel(initial, changed)
+
+    with pytest.raises(ModelError, match="repair changed synthesized content"):
+        syn.synthesize(pack, model)
+
+    assert model.repair_calls == 1
 
 
 def test_synthesize_retries_transient_error_and_aggregates_usage(

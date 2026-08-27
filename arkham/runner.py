@@ -19,6 +19,7 @@ from arkham.config import ConfigError, Settings
 from arkham.costs import compute_costs
 from arkham.http import SafeHttpClient
 from arkham.intelligence.llm.base import TransientModelError
+from arkham.intelligence.synthesize import SynthesisContractError
 from arkham.models import (
     Briefing,
     CostMetrics,
@@ -294,12 +295,18 @@ def execute_run(
         generated_by = model.label
         try:
             output = c.synthesize(pack, model)
-        except TransientModelError as exc:
+        except (TransientModelError, SynthesisContractError) as exc:
             if model.provider != "gemini":
                 raise
+            reason = (
+                "exhausted transient retries"
+                if isinstance(exc, TransientModelError)
+                else "ranked evidence repair failed"
+            )
             log.warning(
-                "analyst model %s exhausted transient retries; analyst fallback: template",
+                "analyst model %s %s; analyst fallback: template; template fallback used",
                 model.label,
+                reason,
             )
             fallback_model = c.build_model(replace(settings, llm_provider="template"), http)
             output = c.synthesize(pack, fallback_model)

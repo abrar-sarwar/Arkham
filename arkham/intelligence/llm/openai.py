@@ -12,8 +12,13 @@ from arkham.intelligence.llm.base import (
     ModelError,
     TransientModelError,
 )
-from arkham.intelligence.synthesize import SYSTEM_PROMPT, build_user_prompt, parse_model_json
-from arkham.models import EvidencePack, LLMUsage, ModelOutput
+from arkham.intelligence.synthesize import (
+    SYSTEM_PROMPT,
+    build_repair_prompt,
+    build_user_prompt,
+    parse_model_json,
+)
+from arkham.models import BriefingDraft, EvidencePack, LLMUsage, ModelOutput
 
 MAX_RESPONSE_BYTES = 2_000_000
 
@@ -45,13 +50,25 @@ class OpenAIModel(IntelligenceModel):
         self._url = root if root.endswith("/chat/completions") else root + "/chat/completions"
 
     def synthesize(self, evidence: EvidencePack) -> ModelOutput:
+        return self._complete(build_user_prompt(evidence))
+
+    def repair(
+        self,
+        evidence: EvidencePack,
+        draft: BriefingDraft,
+        *,
+        contract_error: str,
+    ) -> ModelOutput:
+        return self._complete(build_repair_prompt(evidence, draft, contract_error=contract_error))
+
+    def _complete(self, user_prompt: str) -> ModelOutput:
         payload = {
             "model": self.model,
             "temperature": 0,
             "response_format": {"type": "json_object"},
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": build_user_prompt(evidence)},
+                {"role": "user", "content": user_prompt},
             ],
         }
         if self._reasoning_effort:

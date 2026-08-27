@@ -141,6 +141,7 @@ class ScriptedGeminiModel(IntelligenceModel):
     def __init__(self, failures: list[ModelError] | None = None) -> None:
         self.failures = list(failures or [])
         self.calls = 0
+        self.repair_calls = 0
 
     def synthesize(self, evidence: EvidencePack) -> ModelOutput:
         self.calls += 1
@@ -149,6 +150,37 @@ class ScriptedGeminiModel(IntelligenceModel):
         output = TemplateModel().synthesize(evidence)
         return output.model_copy(
             update={"usage": LLMUsage(provider=self.provider, model=self.model, calls=1)}
+        )
+
+    def repair(
+        self,
+        evidence: EvidencePack,
+        draft: BriefingDraft,
+        *,
+        contract_error: str,
+    ) -> ModelOutput:
+        self.repair_calls += 1
+        raise ModelError("repair should not be called for a valid draft")
+
+
+class InvalidRankGeminiModel(ScriptedGeminiModel):
+    def synthesize(self, evidence: EvidencePack) -> ModelOutput:
+        output = super().synthesize(evidence)
+        duplicate = [output.draft.items[0], output.draft.items[0]]
+        return output.model_copy(update={"draft": output.draft.model_copy(update={"items": duplicate})})
+
+    def repair(
+        self,
+        evidence: EvidencePack,
+        draft: BriefingDraft,
+        *,
+        contract_error: str,
+    ) -> ModelOutput:
+        self.repair_calls += 1
+        return ModelOutput(
+            draft=draft,
+            raw_text=draft.model_dump_json(),
+            usage=LLMUsage(provider=self.provider, model=self.model, calls=1),
         )
 
 
@@ -395,8 +427,51 @@ def test_successful_gemini_synthesis_does_not_build_fallback(
     )
 
     assert outcome.run.status == "success"
-    assert built == ["gemini"] and primary.calls == 1
+    assert built == ["gemini"] and primary.calls == 1 and primary.repair_calls == 0
     assert outcome.briefing is not None and outcome.briefing.generated_by == primary.label
+
+
+def test_failed_gemini_rank_repair_uses_template_fallback_and_passes_validator(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    settings = load_settings(
+        {
+            "LLM_PROVIDER": "gemini",
+            "LLM_MODEL": "gemini-test",
+            "GEMINI_API_KEY": "test-key",
+        },
+        dotenv_path=None,
+    )
+    primary = InvalidRankGeminiModel()
+    built: list[str] = []
+    h = build_components()
+
+    def build_model(current_settings, _http):
+        built.append(current_settings.llm_provider)
+        return TemplateModel() if current_settings.llm_provider == "template" else primary
+
+    h.components.build_model = build_model
+    h.components.synthesize = synthesis.synthesize
+    h.components.validate_draft = validate_draft
+    monkeypatch.setattr(synthesis, "_sleep", lambda _delay: None)
+
+    outcome = execute_run(
+        settings,
+        RunOptions(dry_run=True),
+        storage=MemoryStorage(),
+        now=NOW,
+        components=h.components,
+    )
+
+    assert outcome.run.status == "success"
+    assert built == ["gemini", "template"]
+    assert primary.calls == 1 and primary.repair_calls == 1
+    assert outcome.briefing is not None
+    assert outcome.briefing.generated_by == "template (fallback)"
+    assert validate_draft(outcome.briefing.draft, outcome.pack, settings.max_events) == []
+    assert "repair attempted" in caplog.text
+    assert "repair failed" in caplog.text
+    assert "template fallback used" in caplog.text
 
 
 def test_non_transient_gemini_failure_does_not_fall_back_or_deliver() -> None:

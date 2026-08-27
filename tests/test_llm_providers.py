@@ -11,7 +11,7 @@ from arkham.intelligence import synthesize as synthesis
 from arkham.intelligence.llm import build_model
 from arkham.intelligence.llm.base import ModelError
 from arkham.intelligence.llm.template import TemplateModel
-from tests.test_synthesize import build_pack, citrix_kev_event
+from tests.test_synthesize import build_pack, citrix_kev_event, gitea_event
 
 
 def draft_json() -> dict:
@@ -169,6 +169,44 @@ def test_gemini_provider_reuses_openai_compatible_implementation() -> None:
     assert "UNTRUSTED EVIDENCE" in payload["messages"][0]["content"]
     assert output.usage.provider == "gemini" and output.usage.calls == 1
     assert output.draft.items[0].ref == "E1"
+
+
+def test_gemini_rank_repair_is_one_reformat_call_with_stable_identity_map() -> None:
+    seen: list[httpx.Request] = []
+    pack = build_pack([citrix_kev_event(), gitea_event()])
+    initial = draft_json()
+    initial["items"].append(dict(initial["items"][0]))
+    repaired = draft_json()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        body = initial if len(seen) == 1 else repaired
+        return httpx.Response(
+            200,
+            request=request,
+            json={
+                "choices": [{"message": {"content": json.dumps(body)}}],
+                "usage": {"prompt_tokens": 50, "completion_tokens": 10},
+            },
+        )
+
+    settings = Settings(
+        llm_provider="gemini",
+        llm_model="gemini-model",
+        gemini_api_key="AIza" + "k" * 35,
+    )
+    with SafeHttpClient(transport=httpx.MockTransport(handler)) as http:
+        output = synthesis.synthesize(pack, build_model(settings, http))
+
+    assert [item.ref for item in output.draft.items] == ["E1"]
+    assert len(seen) == 2
+    repair_payload = json.loads(seen[1].content)
+    assert repair_payload["reasoning_effort"] == "low"
+    repair_prompt = repair_payload["messages"][1]["content"]
+    assert "REFORMAT ONLY" in repair_prompt
+    assert pack.items[0].event_id in repair_prompt
+    assert pack.items[1].event_id in repair_prompt
+    assert repair_prompt.count('"ref": "E1"') >= 2
 
 
 def test_gemini_provider_honours_custom_base_url_and_requires_key() -> None:

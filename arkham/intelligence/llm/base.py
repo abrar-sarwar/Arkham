@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from arkham.models import EvidencePack, LLMUsage, ModelOutput
+from arkham.models import BriefingDraft, EvidencePack, LLMUsage, ModelOutput
 
 TRANSIENT_MODEL_HTTP_STATUSES = frozenset({429, 500, 502, 503, 504})
 
@@ -35,6 +35,16 @@ class IntelligenceModel(ABC):
     @abstractmethod
     def synthesize(self, evidence: EvidencePack) -> ModelOutput:
         """Produce a :class:`BriefingDraft` grounded ONLY in ``evidence``. Raise :class:`ModelError` on failure."""
+
+    def repair(
+        self,
+        evidence: EvidencePack,
+        draft: BriefingDraft,
+        *,
+        contract_error: str,
+    ) -> ModelOutput:
+        """Reformat an existing draft without adding claims. Providers may opt in."""
+        raise ModelError(f"{self.label} does not support ranked-output repair")
 
     @property
     def label(self) -> str:
