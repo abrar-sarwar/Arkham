@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0" xml:base="https://www.ncsc.gov.uk/">
+  <channel>
+    <title>All Feed</title>
+    <link>https://www.ncsc.gov.uk/</link>
+    <description>This includes feeds from report, guidance and blog-post</description>
+    <language>en</language>
+    
+    <item>
+  <title>Managing the cyber risk of agentic AI</title>
+  <link>https://www.ncsc.gov.uk/blogs/managing-the-cyber-risk-of-agentic-ai</link>
+  <description>Use safeguards, sandboxing and active oversight to realise the benefits of autonomous systems while limiting the unintended activity.</description>
+  <pubDate>Thu, 20 Aug 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/blogs/managing-the-cyber-risk-of-agentic-ai</guid>
+    </item>
+<item>
+  <title>How BitLocker PINs help protect your data and devices</title>
+  <link>https://www.ncsc.gov.uk/blogs/how-bitlocker-pins-help-protect-your-data-and-devices</link>
+  <description>Using a PIN mitigates many BitLocker vulnerabilities. Make sure you’re ready for the next one...</description>
+  <pubDate>Thu, 13 Aug 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/blogs/how-bitlocker-pins-help-protect-your-data-and-devices</guid>
+    </item>
+<item>
+  <title>NCSC statement in response to recent incidents resulting from frontier AI evaluations</title>
+  <link>https://www.ncsc.gov.uk/news/ncsc-statement-in-response-to-recent-incidents-resulting-from-frontier-ai-evaluations</link>
+  <description>A statement from Ollie Whitehouse, Chief Technology Officer at the NCSC, on AI security following recent incidents.</description>
+  <pubDate>Tue, 04 Aug 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/news/ncsc-statement-in-response-to-recent-incidents-resulting-from-frontier-ai-evaluations</guid>
+    </item>
+<item>
+  <title>UK and partners expose Russian state-supported actors for new ‘zero-click’ phishing campaign targeting Western organisations</title>
+  <link>https://www.ncsc.gov.uk/news/uk-and-partners-expose-russian-state-supported-actors-for-new-zero-click-phishing-campaign</link>
+  <description>GCHQ’s National Cyber Security Centre and international partners issue warning as ‘LAUNDRY BEAR’ cyber threat group exposed for targeted phishing campaign</description>
+  <pubDate>Thu, 23 Jul 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/news/uk-and-partners-expose-russian-state-supported-actors-for-new-zero-click-phishing-campaign</guid>
+    </item>
+<item>
+  <title>Alert: NCSC issues advice following global targeting of Fortinet firewalls and VPN gateways</title>
+  <link>https://www.ncsc.gov.uk/news/advice-following-global-targeting-of-fortinet-firewalls-and-vpn-gateways</link>
+  <description>Organisations using Fortinet services are being urged to take action following a campaign affecting firewalls and VPN gateways.</description>
+  <pubDate>Thu, 18 Jun 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/news/advice-following-global-targeting-of-fortinet-firewalls-and-vpn-gateways</guid>
+    </item>
+
+  </channel>
+</rss>

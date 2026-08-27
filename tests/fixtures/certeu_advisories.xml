@@ -1,0 +1,62 @@
+<rss version="2.0">
+    <channel>
+        <title>Latest publications of type Security Advisories</title>
+        <link>https://cert.europa.eu/publications/security-advisories/</link>
+        <description>RSS feed for the latest 10 publications of type Security Advisories.</description>
+        <ttl>1440</ttl>
+        <language>en-gb</language>
+        <item>
+            <title>2026-010: Critical Vulnerabilities in Citrix NetScaler ADC and NetScaler Gateway</title>
+            <link>
+                https://cert.europa.eu/publications/security-advisories/2026-010/
+            </link>
+            <description>On 19 August 2026, Citrix published a security advisory addressing multiple critical vulnerabilities in NetScaler ADC (formerly Citrix ADC) and NetScaler Gateway (formerly Citrix Gateway).&lt;br&gt;
+CERT-EU recommends updating affected devices as soon as possible.&lt;br&gt;
+</description>
+            <pubDate>Wed, 19 Aug 2026 18:13:47 CEST</pubDate>
+            <guid>security-advisories-10947</guid>
+        </item><item>
+            <title>2026-009: Critical Vulnerabilities in Microsoft SharePoint</title>
+            <link>
+                https://cert.europa.eu/publications/security-advisories/2026-009/
+            </link>
+            <description>[UPDATED] On 14 July 2026, Microsoft released security updates addressing critical remote code execution (RCE) vulnerabilities in Microsoft SharePoint Server. On 20 July 2026, WatchTowr identified a proof-of-concept exploit code and subsequently observed active exploitation of CVE-2026-50522, a vulnerability part of an ongoing series of actively exploited flaws affecting on-premise SharePoint Server instances, including CVE-2026-32201, CVE-2026-45659, CVE-2026-56164, and CVE-2026-58644.&lt;br&gt;
+CERT-EU strongly recommends updating affected servers immediately, rotating credentials for any assets that may have been exposed to the internet, and conducting a compromise assessment.&lt;br&gt;
+</description>
+            <pubDate>Thu, 23 Jul 2026 09:13:03 CEST</pubDate>
+            <guid>security-advisories-10946</guid>
+        </item><item>
+            <title>2026-007: Critical Vulnerability in Windows Netlogon</title>
+            <link>
+                https://cert.europa.eu/publications/security-advisories/2026-007/
+            </link>
+            <description>On 12 May 2026, Microsoft published a security advisory addressing a critical vulnerability affecting Windows Server when acting as a domain controller. This vulnerability allows an unauthenticated attacker to execute arbitrary code over a network.&lt;br&gt;
+According to The Centre for Cybersecurity Belgium (CCB), this vulnerability is currently exploited by threat actors. It is strongly recommended updating affected Windows servers as soon as possible. &lt;br&gt;
+</description>
+            <pubDate>Wed, 10 Jun 2026 08:47:08 CEST</pubDate>
+            <guid>security-advisories-10944</guid>
+        </item><item>
+            <title>2026-005: High Vulnerability in the Linux Kernel (&#34;Copy Fail&#34;)</title>
+            <link>
+                https://cert.europa.eu/publications/security-advisories/2026-005/
+            </link>
+            <description>On 29 April 2026, a high local privilege escalation vulnerability in the Linux kernel, tracked as CVE-2026-31431 and named &#34;Copy Fail&#34;, was publicly disclosed.&lt;br&gt;
+The vulnerability affects every mainstream Linux distributions shipping a kernel built since 2017. A public proof-of-concept exploit has been released.&lt;br&gt;
+As of the date of this advisory, no distribution has shipped a fixed kernel package. The mainline fix was committed on 1 April 2026, but vendor updates are still pending across all major distributions. CERT-EU strongly recommends applying the interim mitigation immediately, prioritising Kubernetes nodes, and CI/CD runners exposed to untrusted workloads.&lt;br&gt;
+</description>
+            <pubDate>Thu, 30 Apr 2026 11:25:30 CEST</pubDate>
+            <guid>security-advisories-10942</guid>
+        </item><item>
+            <title>2026-002: Multiple Vulnerabilities in Cisco Products</title>
+            <link>
+                https://cert.europa.eu/publications/security-advisories/2026-002/
+            </link>
+            <description>On 25 February 2026, Cisco released security advisories addressing multiple high and critical severity vulnerabilities in Cisco Catalyst SD-WAN controllers and Cisco SD-WAN Manager. If exploited, these vulnerabilities could allow attackers to gain administrative access to compromised systems. &lt;br&gt;
+It is recommended to capture forensic evidence, hunt for indicators of compromise, and apply updates as soon as possible.&lt;br&gt;
+One of the vulnerabilities, CVE-2026-20127, is exploited in the wild since 2023.&lt;br&gt;
+</description>
+            <pubDate>Thu, 26 Feb 2026 19:38:52 CET</pubDate>
+            <guid>security-advisories-10939</guid>
+        </item>
+    </channel>
+</rss>

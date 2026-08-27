@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rss
+  version="2.0">
+  <channel>
+    <title>MSRC Security Update Guide</title>
+    <link>https://msrc.microsoft.com/update-guide/</link>
+    <description />
+    <lastBuildDate>Wed, 26 Aug 2026 16:19:20 Z</lastBuildDate>
+    <item
+      Revision="1.1000000000">
+      <guid
+        isPermaLink="false">CVE-2026-62890</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-62890</link>
+      <category>CVE</category>
+      <title>CVE-2026-62890 Windows GDI+ Elevation of Privilege Vulnerability</title>
+      <description>Updated an acknowledgement. This is an informational change only.</description>
+      <pubDate>Wed, 26 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.3000000000">
+      <guid
+        isPermaLink="false">CVE-2026-62747</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-62747</link>
+      <category>CVE</category>
+      <title>CVE-2026-62747 Windows Device Association Service Elevation of Privilege Vulnerability</title>
+      <description>Updated an acknowledgement. This is an informational change only.</description>
+      <pubDate>Tue, 25 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="2.2000000000">
+      <guid
+        isPermaLink="false">CVE-2026-70337</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-70337</link>
+      <category>CVE</category>
+      <title>CVE-2026-70337 Microsoft PowerShell Remote Code Execution Vulnerability</title>
+      <description>Acknowledgement Updated</description>
+      <pubDate>Tue, 25 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.1000000000">
+      <guid
+        isPermaLink="false">CVE-2026-59130</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-59130</link>
+      <category>CVE</category>
+      <title>CVE-2026-59130 AMD Zen Information Disclosure Vulnerability</title>
+      <description>Updated CWE value.  This is an informational change only.</description>
+      <pubDate>Tue, 25 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="2.0000000000">
+      <guid
+        isPermaLink="false">CVE-2026-47292</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-47292</link>
+      <category>CVE</category>
+      <title>CVE-2026-47292 Visual Studio Code MSSQL Extension Remote Code Execution Vulnerability</title>
+      <description>Affected software updated with new package information.</description>
+      <pubDate>Mon, 24 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.1000000000">
+      <guid
+        isPermaLink="false">CVE-2026-69836</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-69836</link>
+      <category>CVE</category>
+      <title>CVE-2026-69836 Microsoft Entra ID Remote Code Execution Vulnerability</title>
+      <description>Corrected **Exploited** to **No**. This vulnerability was not exploited in the wild. This is an informational change only.</description>
+      <pubDate>Fri, 21 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.0000000000">
+      <guid
+        isPermaLink="false">CVE-2026-62834</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-62834</link>
+      <category>CVE</category>
+      <title>CVE-2026-62834 Azure Data Factory Elevation of Privilege Vulnerability</title>
+      <description>&lt;p&gt;Improper verification of cryptographic signature in Azure Data Factory allows an unauthorized attacker to elevate privileges over a network.&lt;/p&gt;</description>
+      <pubDate>Thu, 20 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.0000000000">
+      <guid
+        isPermaLink="false">CVE-2026-69836</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-69836</link>
+      <category>CVE</category>
+      <title>CVE-2026-69836 Microsoft Entra ID Remote Code Execution Vulnerability</title>
+      <description>&lt;p&gt;Deserialization of untrusted data in Microsoft Entra ID allows an unauthorized attacker to execute code over a network.&lt;/p&gt;</description>
+      <pubDate>Thu, 20 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.0000000000">
+      <guid
+        isPermaLink="false">CVE-2026-55015</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-55015</link>
+      <category>CVE</category>
+      <title>CVE-2026-55015 Microsoft Remote Help Denial of Service Vulnerability</title>
+      <description>&lt;p&gt;Uncontrolled search path element in Windows Remote Help allows an authorized attacker to deny service locally.&lt;/p&gt;</description>
+      <pubDate>Thu, 20 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.0000000000">
+      <guid
+        isPermaLink="false">CVE-2026-55013</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-55013</link>
+      <category>CVE</category>
+      <title>CVE-2026-55013 Windows Remote Help Defense Spoofing Vulnerability</title>
+      <description>&lt;p&gt;Uncontrolled search path element in Windows Remote Help Defense allows an authorized attacker to perform spoofing locally.&lt;/p&gt;</description>
+      <pubDate>Thu, 20 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+<item
+      Revision="1.0000000000">
+      <guid
+        isPermaLink="false">CVE-2026-59132</guid>
+      <link>https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-59132</link>
+      <category>CVE</category>
+      <title>CVE-2026-59132 Windows TCP/IP Denial of Service Vulnerability</title>
+      <description>Information published.</description>
+      <pubDate>Tue, 11 Aug 2026 07:00:00 -0700</pubDate>
+    </item>
+  </channel>
+</rss>

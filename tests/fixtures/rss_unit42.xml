@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	xmlns:dcterms="http://purl.org/dc/terms/"
+>
+
+<channel>
+	<title>Unit 42</title>
+	<atom:link href="https://unit42.paloaltonetworks.com/feed/" rel="self" type="application/rss+xml" />
+	<link>https://unit42.paloaltonetworks.com/</link>
+	<description>Palo Alto Networks</description>
+	<lastBuildDate>Mon, 24 Aug 2026 14:50:12 +0000</lastBuildDate>
+	<language>en-US</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=7.0.4</generator>
+
+<image>
+	<url>https://unit42.paloaltonetworks.com/wp-content/uploads/2024/06/icon-Unit42-180x180-1.png</url>
+	<title>Unit 42</title>
+	<link>https://unit42.paloaltonetworks.com/</link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+	<item>
+		<title>The State of AI-Enabled Malware August 2026: From Brand Abuse to Agentic Execution</title>
+		<link>https://unit42.paloaltonetworks.com/ai-enabled-malware-analysis/</link>
+		
+		<dc:creator><![CDATA[Sara McBroom]]></dc:creator>
+		<pubDate>Tue, 25 Aug 2026 10:00:57 +0000</pubDate>
+				<category><![CDATA[Malware]]></category>
+		<category><![CDATA[Threat Research]]></category>
+		<category><![CDATA[backdoor]]></category>
+		<category><![CDATA[Bitcoin]]></category>
+		<category><![CDATA[DLL hijacking]]></category>
+		<category><![CDATA[ransomware]]></category>
+		<category><![CDATA[Sandbox]]></category>
+		<category><![CDATA[VirusTotal]]></category>
+		<guid isPermaLink="false">https://unit42.paloaltonetworks.com/?p=186148</guid>
+
+					<description><![CDATA[<p>Explore Unit 42 research on AI-enabled malware. Learn how existing behavioral detection and endpoint analytics stop AI-authored code before execution.</p>
+<p>The post <a href="https://unit42.paloaltonetworks.com/ai-enabled-malware-analysis/">The State of AI-Enabled Malware August 2026: From Brand Abuse to Agentic Execution</a> appeared first on <a href="https://unit42.paloaltonetworks.com">Unit 42</a>.</p>
+]]></description>
+		
+		
+		
+		<readTime>7</readTime>
+		<featuredImage>https://unit42.paloaltonetworks.com/wp-content/uploads/2026/08/AdobeStock_1270203474-2-1-300x300.png</featuredImage>
+		<dcterms:extent>7</dcterms:extent>
+		<enclosure url="https://unit42.paloaltonetworks.com/wp-content/uploads/2026/08/AdobeStock_1270203474-2-1.png" type="image/png"  length="2092628"/>
+			</item>
+		<item>
+		<title>Connecting the Dots: Securing the Overlooked Corners of the Software Development Lifecycle (SDLC) Supply Chain</title>
+		<link>https://unit42.paloaltonetworks.com/sdlc-supply-chain/</link>
+		
+		<dc:creator><![CDATA[Yaron Avital]]></dc:creator>
+		<pubDate>Fri, 21 Aug 2026 23:00:21 +0000</pubDate>
+				<category><![CDATA[General]]></category>
+		<category><![CDATA[Insights]]></category>
+		<category><![CDATA[ChainDrop]]></category>
+		<category><![CDATA[npm packages]]></category>
+		<category><![CDATA[software supply-chain attack]]></category>
+		<category><![CDATA[supply chain]]></category>
+		<guid isPermaLink="false">https://unit42.paloaltonetworks.com/?p=185935</guid>
+
+					<description><![CDATA[<p>Attackers are targeting CI/CD pipelines and developer tools instead of application code, requiring total SDLC visibility and strict security controls</p>
+<p>The post <a href="https://unit42.paloaltonetworks.com/sdlc-supply-chain/">Connecting the Dots: Securing the Overlooked Corners of the Software Development Lifecycle (SDLC) Supply Chain</a> appeared first on <a href="https://unit42.paloaltonetworks.com">Unit 42</a>.</p>
+]]></description>
+		
+		
+		
+		<readTime>4</readTime>
+		<featuredImage>https://unit42.paloaltonetworks.com/wp-content/uploads/2026/08/09_Myth-Busting_Category_1505x922-300x300.jpg</featuredImage>
+		<dcterms:extent>4</dcterms:extent>
+		<enclosure url="https://unit42.paloaltonetworks.com/wp-content/uploads/2026/08/09_Myth-Busting_Category_1505x922.jpg" type="image/jpeg"  length="776234"/>
+			</item>
+		<item>
+		<title>Identity Abuse Through Trusted Communication Channels</title>
+		<link>https://unit42.paloaltonetworks.com/communication-channel-identity-risks/</link>
+		
+		<dc:creator><![CDATA[Bill Batchelor]]></dc:creator>
+		<pubDate>Thu, 20 Aug 2026 10:00:25 +0000</pubDate>
+				<category><![CDATA[Malware]]></category>
+		<category><![CDATA[Threat Research]]></category>
+		<category><![CDATA[authentication]]></category>
+		<category><![CDATA[identity theft]]></category>
+		<category><![CDATA[malware]]></category>
+		<category><![CDATA[MFA]]></category>
+		<category><![CDATA[remote access software]]></category>
+		<category><![CDATA[social engineering]]></category>
+		<guid isPermaLink="false">https://unit42.paloaltonetworks.com/?p=185799</guid>
+
+					<description><![CDATA[<p>Unit 42 details how attackers exploit enterprise collaboration tools for identity phishing and credential theft. Discover key defense strategies.</p>
+<p>The post <a href="https://unit42.paloaltonetworks.com/communication-channel-identity-risks/">Identity Abuse Through Trusted Communication Channels</a> appeared first on <a href="https://unit42.paloaltonetworks.com">Unit 42</a>.</p>
+]]></description>
+		
+		
+		
+		<readTime>12</readTime>
+		<featuredImage>https://unit42.paloaltonetworks.com/wp-content/uploads/2026/08/02_Malware_Category_1920x900-2-300x300.jpg</featuredImage>
+		<dcterms:extent>12</dcterms:extent>
+		<enclosure url="https://unit42.paloaltonetworks.com/wp-content/uploads/2026/08/02_Malware_Category_1920x900-2.jpg" type="image/jpeg"  length="1869627"/>
+			</item>
+	</channel>
+</rss>

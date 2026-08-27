@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arkham"
+version = "1.0.0"
+description = "Personal open-source cyber threat intelligence agent: collects, verifies, prioritizes and summarizes global cybersecurity developments into a daily briefing delivered to a private Discord channel."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "httpx==0.28.1",
+    "feedparser==6.0.14",
+    "pydantic==2.13.4",
+    "tzdata==2026.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "ruff==0.16.4",
+    "pip-audit>=2.9",
+]
+
+[project.scripts]
+arkham = "arkham.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["arkham*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["error::DeprecationWarning:arkham.*"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+ignore = ["S101", "S311", "E501", "UP017", "UP042"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "B"]
+"deploy/*" = ["S108"]

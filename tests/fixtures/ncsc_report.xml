@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0" xml:base="https://www.ncsc.gov.uk/">
+  <channel>
+    <title>Report Feed</title>
+    <link>https://www.ncsc.gov.uk/</link>
+    <description>This includes feeds from report</description>
+    <language>en</language>
+    
+    <item>
+  <title>Impact of AI on cyber threat from now to 2027</title>
+  <link>https://www.ncsc.gov.uk/report/impact-ai-cyber-threat-now-2027</link>
+  <description>An NCSC assessment highlighting the impacts on cyber threat from AI developments between now and 2027.</description>
+  <pubDate>Wed, 07 May 2025 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/report/impact-ai-cyber-threat-now-2027</guid>
+    </item>
+<item>
+  <title>A method to assess 'forgivable' vs 'unforgivable' vulnerabilities</title>
+  <link>https://www.ncsc.gov.uk/report/a-method-to-assess-forgivable-vs-unforgivable-vulnerabilities</link>
+  <description>Research from the NCSC designed to eradicate vulnerability classes and make the top-level mitigations easier to implement.</description>
+  <pubDate>Tue, 28 Jan 2025 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/report/a-method-to-assess-forgivable-vs-unforgivable-vulnerabilities</guid>
+    </item>
+<item>
+  <title>Malware analysis report on SparrowDoor malware</title>
+  <link>https://www.ncsc.gov.uk/report/mar-sparrowdoor</link>
+  <description>A technical analysis of a new variant of the SparrowDoor malware.</description>
+  <pubDate>Mon, 25 Apr 2022 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/report/mar-sparrowdoor</guid>
+    </item>
+
+  </channel>
+</rss>

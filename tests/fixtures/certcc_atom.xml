@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xml:lang="en-us" xmlns="http://www.w3.org/2005/Atom"><title>CERT Recently Published Vulnerability Notes</title><link href="https://kb.cert.org/vuls/" rel="alternate"/><link href="https://kb.cert.org/vuls/atomfeed/" rel="self"/><id>https://kb.cert.org/vuls/</id><updated>2026-08-25T16:58:54.824143+00:00</updated><author><name>CERT</name><email>cert@cert.org</email><uri>https://www.sei.cmu.edu</uri></author><subtitle>CERT publishes vulnerability advisories called "Vulnerability Notes." Vulnerability Notes include summaries, technical details, remediation information, and lists of affected vendors.  Many vulnerability notes are the result of private coordination and disclosure efforts.</subtitle><entry><title>VU#308749: Remote Code Execution and Arbitrary File Read Vulnerabilities in Kaltura Servers</title><link href="https://kb.cert.org/vuls/id/308749" rel="alternate"/><published>2026-08-25T16:11:49.036497+00:00</published><updated>2026-08-25T16:58:54.824143+00:00</updated><id>https://kb.cert.org/vuls/id/308749</id><summary type="html">
+
+&lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;The Kaltura HTML5 Player Library (mwEmbed / html5lib) contains two vulnerabilities, both involving the same insecure deserialization flaw, that enable arbitrary file read and remote code execution. Affected versions include html5lib v2.45, v2.103 and earlier, and other v2.x releases that expose the vulnerable &lt;code&gt;mwEmbedLoader.php&lt;/code&gt; endpoint. Until a vendor patch is available, users are advised to restrict access to the affected endpoint or disable it entirely.&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Kaltura is an AI video platform that provides tools for video management, publishing, playback, and integration with web applications. Kaltura’s HTML5 player library exposes the &lt;code&gt;mwEmbedLoader.php&lt;/code&gt; endpoint, which accepts a user-controlled &lt;code&gt;ServiceUrl&lt;/code&gt; parameter as the target URL for backend API requests. The &lt;code&gt;KalturaClientBase&lt;/code&gt; PHP client library fetches data from this URL and automatically deserializes it using PHP's &lt;code&gt;unserialize()&lt;/code&gt; function without validating source, scheme, or content. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-19913&lt;/strong&gt; results from the combination of this unsafe deserialization flaw and improper error-handling behavior. An attacker can provide the location of a local file to &lt;code&gt;ServiceUrl&lt;/code&gt; as a &lt;code&gt;file://&lt;/code&gt; path, and the client will fetch the internal file's contents and attempt to deserialize them. When deserialization fails, the raw bytes are reflected back to the client in the resulting error message, enabling the attacker to read any file accessible to the web-server user.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-19912&lt;/strong&gt; is caused by insufficient sanitization of the parameter &lt;code&gt;uiconf_id&lt;/code&gt;, which is appended to the base cache folder path when the application writes data to disk. Because this value is user-controlled and unsanitized, an attacker can supply values that include directory traversal sequences such as &lt;code&gt;../&lt;/code&gt; to redirect file writes outside the intended cache directory. When the deployment uses the default file-based cache backend, an attacker can direct &lt;code&gt;ServiceUrl&lt;/code&gt; to a malicious serialized object containing executable PHP code, then supply a &lt;code&gt;uiconf_id&lt;/code&gt; path value that writes its deserialized fields to a web-accessible directory. The attacker can then request the file directly to achieve remote code execution as the web-server user. A memcache-only backend may suppress the file write and prevent this specific code-execution path, but the underlying unsafe deserialization behavior and unsanitized path construction remain present.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;These vulnerabilities allow a remote, unauthenticated attacker to read arbitrary local files and execute arbitrary commands as the web-server user. No authentication or Kaltura session token is required to exploit either issue; an attacker only needs network access to the affected html5lib endpoint. &lt;/p&gt;
+&lt;p&gt;CVE-2026-19913 can be abused to obtain database credentials, administrative secrets, API keys, or any other sensitive information hosted on the affected instance. Remote code execution achieved through CVE-2026-19912 allows an attacker to modify or exfiltrate platform data, deploy tools for persistence and lateral movement, and further compromise affected Kaltura deployments. Because the affected endpoint is also exposed on Kaltura's shared, multi-tenant CDN infrastructure, these vulnerabilities affect not only individual customer installations, but also every tenant served by these shared hosts.&lt;/p&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;Unfortunately, the CERT/CC was unable to reach Kaltura to coordinate these vulnerabilities. To reduce risk until a patch is available, users are advised to restrict or disable external access to the &lt;code&gt;mwEmbedLoader.php&lt;/code&gt; endpoint, and enforce a strict allow-list for &lt;code&gt;ServiceUrl&lt;/code&gt; that only permits known, legitimate backend API URLs.&lt;/p&gt;
+&lt;h3 id="acknowledgements"&gt;Acknowledgements&lt;/h3&gt;
+&lt;p&gt;Thanks to Gerjan Wemekamp (AndDone) for researching and reporting these vulnerabilities. This document was written by Molly Jaconski.&lt;/p&gt;
+
+</summary><content type="html">
+
+&lt;div class="row" id="content"&gt;
+  &lt;div class="large-9 medium-9 columns"&gt;
+    &lt;div class="blog-post"&gt;
+      &lt;div class="row"&gt;
+        &lt;div class="large-12 columns"&gt;
+	  
+	  &lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;The Kaltura HTML5 Player Library (mwEmbed / html5lib) contains two vulnerabilities, both involving the same insecure deserialization flaw, that enable arbitrary file read and remote code execution. Affected versions include html5lib v2.45, v2.103 and earlier, and other v2.x releases that expose the vulnerable &lt;code&gt;mwEmbedLoader.php&lt;/code&gt; endpoint. Until a vendor patch is available, users are advised to restrict access to the affected endpoint or disable it entirely.&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Kaltura is an AI video platform that provides tools for video management, publishing, playback, and integration with web applications. Kaltura’s HTML5 player library exposes the &lt;code&gt;mwEmbedLoader.php&lt;/code&gt; endpoint, which accepts a user-controlled &lt;code&gt;ServiceUrl&lt;/code&gt; parameter as the target URL for backend API requests. The &lt;code&gt;KalturaClientBase&lt;/code&gt; PHP client library fetches data from this URL and automatically deserializes it using PHP's &lt;code&gt;unserialize()&lt;/code&gt; function without validating source, scheme, or content. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-19913&lt;/strong&gt; results from the combination of this unsafe deserialization flaw and improper error-handling behavior. An attacker can provide the location of a local file to &lt;code&gt;ServiceUrl&lt;/code&gt; as a &lt;code&gt;file://&lt;/code&gt; path, and the client will fetch the internal file's contents and attempt to deserialize them. When deserialization fails, the raw bytes are reflected back to the client in the resulting error message, enabling the attacker to read any file accessible to the web-server user.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-19912&lt;/strong&gt; is caused by insufficient sanitization of the parameter &lt;code&gt;uiconf_id&lt;/code&gt;, which is appended to the base cache folder path when the application writes data to disk. Because this value is user-controlled and unsanitized, an attacker can supply values that include directory traversal sequences such as &lt;code&gt;../&lt;/code&gt; to redirect file writes outside the intended cache directory. When the deployment uses the default file-based cache backend, an attacker can direct &lt;code&gt;ServiceUrl&lt;/code&gt; to a malicious serialized object containing executable PHP code, then supply a &lt;code&gt;uiconf_id&lt;/code&gt; path value that writes its deserialized fields to a web-accessible directory. The attacker can then request the file directly to achieve remote code execution as the web-server user. A memcache-only backend may suppress the file write and prevent this specific code-execution path, but the underlying unsafe deserialization behavior and unsanitized path construction remain present.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;These vulnerabilities allow a remote, unauthenticated attacker to read arbitrary local files and execute arbitrary commands as the web-server user. No authentication or Kaltura session token is required to exploit either issue; an attacker only needs network access to the affected html5lib endpoint. &lt;/p&gt;
+&lt;p&gt;CVE-2026-19913 can be abused to obtain database credentials, administrative secrets, API keys, or any other sensitive information hosted on the affected instance. Remote code execution achieved through CVE-2026-19912 allows an attacker to modify or exfiltrate platform data, deploy tools for persistence and lateral movement, and further compromise affected Kaltura deployments. Because the affected endpoint is also exposed on Kaltura's shared, multi-tenant CDN infrastructure, these vulnerabilities affect not only individual customer installations, but also every tenant served by these shared hosts.&lt;/p&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;Unfortunately, the CERT/CC was unable to reach Kaltura to coordinate these vulnerabilities. To reduce risk until a patch is available, users are advised to restrict or disable external access to the &lt;code&gt;mwEmbedLoader.php&lt;/code&gt; endpoint, and enforce a strict allow-list for &lt;code&gt;ServiceUrl&lt;/code&gt; that only permits known, legitimate backend API URLs.&lt;/p&gt;
+&lt;h3 id="acknowledgements"&gt;Acknowledgements&lt;/h3&gt;
+&lt;p&gt;Thanks to Gerjan Wemekamp (AndDone) for researching and reporting these vulnerabilities. This document was written by Molly Jaconski.&lt;/p&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; Vendor Information &lt;/h3&gt;
+	  
+	  &lt;div id="vendorinfo"&gt;
+	    One or more vendors are listed for this advisory. Please reference the full report for more information.
+	  &lt;/div&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;br/&gt;
+      
+      
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; References &lt;/h3&gt;
+	  &lt;ul&gt;
+	    
+	    
+	    
+            &lt;li&gt;&lt;a href="https://anddone-git.github.io/2026/one-parameter-two-bugs/" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://anddone-git.github.io/2026/one-parameter-two-bugs/&lt;/a&gt;&lt;/li&gt;
+            
+          
+	  
+	  &lt;/ul&gt;
+	&lt;/div&gt;
+      &lt;/div&gt;
+      
+      &lt;h3&gt;Other Information&lt;/h3&gt;
+        &lt;div class="vulcontent"&gt;
+          &lt;table class="unstriped"&gt;
+            &lt;tbody&gt;
+	      
+              &lt;tr&gt;
+                &lt;td width="200"&gt;&lt;b&gt;CVE IDs:&lt;/b&gt;&lt;/td&gt;
+		&lt;td&gt;
+		
+		
+                &lt;a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=2026-19912"&gt;CVE-2026-19912  &lt;/a&gt;
+		
+                
+		
+                &lt;a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=2026-19913"&gt;CVE-2026-19913  &lt;/a&gt;
+		
+                
+		&lt;/td&gt;
+	      &lt;/tr&gt;
+	      
+	      &lt;tr&gt;
+		&lt;td&gt;
+		  &lt;b&gt;Date Public:&lt;/b&gt;
+		&lt;/td&gt;
+                &lt;td&gt;2026-08-25&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date First Published:&lt;/b&gt;&lt;/td&gt;
+                &lt;td id="datefirstpublished"&gt;2026-08-25&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date Last Updated: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;2026-08-25 16:58 UTC&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Document Revision: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;3 &lt;/td&gt;
+              &lt;/tr&gt;
+            &lt;/tbody&gt;
+          &lt;/table&gt;
+	&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="large-3 medium-3 columns" data-sticky-container&gt;
+  &lt;div class="sticky" data-sticky data-anchor="content"&gt;
+    &lt;div class="sidebar-links"&gt;
+      &lt;ul class="menu vertical"&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" rel="noopener"&gt;About vulnerability notes&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="mailto:cert@cert.org?Subject=VU%23308749 Feedback"&gt;Contact us about this vulnerability&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" &gt;Provide a vendor statement&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+
+
+</content></entry><entry><title>VU#728712: Konami's Metal Gear Online 3 contains a heap-based buffer overflow</title><link href="https://kb.cert.org/vuls/id/728712" rel="alternate"/><published>2026-08-24T14:57:41.816549+00:00</published><updated>2026-08-24T15:03:10.669899+00:00</updated><id>https://kb.cert.org/vuls/id/728712</id><summary type="html">
+
+&lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;Konami's Metal Gear Online 3 video game contains a heap-based buffer overflow that can be triggered by an input‑validation vulnerability that allows match hosts to remotely execute arbitrary code on lobby members' machines through specially crafted data.&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Metal Gear Online 3 is an online 8 vs. 8 competitive shooter game that uses Steam Matchmaking to handle its multiplayer lobbies and matches. As detailed in &lt;strong&gt;&lt;em&gt;CVE‑2026‑19874&lt;/em&gt;&lt;/strong&gt;, version 1.1.2.8 of Metal Gear Online 3 (Steam AppID 287700) contains an input‑validation vulnerability in the processing of Steam lobby metadata related to the player‑removal feature. The game tracks a lobby field (&lt;code&gt;kick_num&lt;/code&gt;) indicating the number of players designated for removal, along with corresponding Steam ID entries of each kicked player (&lt;code&gt;kicked_id_%i&lt;/code&gt;). When joining a lobby, the player's client parses these fields to check whether its own Steam ID is on the list, and if so, the player is prevented from joining the match. &lt;/p&gt;
+&lt;p&gt;The function responsible for parsing this lobby data does not validate the &lt;code&gt;kick_num&lt;/code&gt; value against the size of the fixed‑length buffer allocated for kicked player identifiers. Supplying a &lt;code&gt;kick_num&lt;/code&gt; value larger than the buffer capacity results in out‑of‑bounds writes into adjacent memory. The memory region immediately following this buffer contains internal Steamworks callback handler structures that store function pointers and callback arguments for processing lobby data changes, messages, and other related events. By manipulating the overflow, an attacker can corrupt these handler structures and redirect callback execution, resulting in control‑flow hijacking on affected client systems. The vulnerability can be triggered automatically when a client joins a lobby controlled by an attacker.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;Exploitation of this vulnerability may allow remote code execution on affected clients. Initial control‑flow hijacking provides access only to existing in‑process code; however, the Metal Gear Online 3 binary includes Denuvo‑protected regions mapped with read‑write‑execute (RWX) permissions. These regions permit runtime injection of attacker‑supplied code, significantly increasing the severity of the issue. An attacker hosting a lobby can achieve code execution on any client that joins, without requiring further interaction from the victim. Additionally, because host privileges are automatically reassigned to another lobby participant when the current host exits, an attacker can obtain host control during an active match and subsequently deliver the malicious lobby data to all connected players. This enables compromise of multiple systems through a single exploitation event.&lt;/p&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;As of this writing, Konami has not released patch notes or an advisory that specifically addresses this vulnerability, but a fix was included in version 1.1.2.9 of the Metal Gear Online 3 executable, &lt;code&gt;mgsvmgo.exe&lt;/code&gt;. The patch also iterated the server and lobby version numbers from 15 to 16 and 150 to 160, respectively, to prevent players on older versions from accessing the online services.&lt;/p&gt;
+&lt;p&gt;This is the latest patch that fixed the vulnerability:&lt;br&gt;
+https://steamdb.info/patchnotes/24176213/&lt;/p&gt;
+&lt;p&gt;The full patch list can be found here:&lt;br&gt;
+https://steamdb.info/app/287700/patchnotes/&lt;/p&gt;
+&lt;h3 id="acknowledgements"&gt;Acknowledgements&lt;/h3&gt;
+&lt;p&gt;Thank you to Alice Cecchetto for reporting this vulnerability. This document was written by Bob Kemerer.&lt;/p&gt;
+
+</summary><content type="html">
+
+&lt;div class="row" id="content"&gt;
+  &lt;div class="large-9 medium-9 columns"&gt;
+    &lt;div class="blog-post"&gt;
+      &lt;div class="row"&gt;
+        &lt;div class="large-12 columns"&gt;
+	  
+	  &lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;Konami's Metal Gear Online 3 video game contains a heap-based buffer overflow that can be triggered by an input‑validation vulnerability that allows match hosts to remotely execute arbitrary code on lobby members' machines through specially crafted data.&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Metal Gear Online 3 is an online 8 vs. 8 competitive shooter game that uses Steam Matchmaking to handle its multiplayer lobbies and matches. As detailed in &lt;strong&gt;&lt;em&gt;CVE‑2026‑19874&lt;/em&gt;&lt;/strong&gt;, version 1.1.2.8 of Metal Gear Online 3 (Steam AppID 287700) contains an input‑validation vulnerability in the processing of Steam lobby metadata related to the player‑removal feature. The game tracks a lobby field (&lt;code&gt;kick_num&lt;/code&gt;) indicating the number of players designated for removal, along with corresponding Steam ID entries of each kicked player (&lt;code&gt;kicked_id_%i&lt;/code&gt;). When joining a lobby, the player's client parses these fields to check whether its own Steam ID is on the list, and if so, the player is prevented from joining the match. &lt;/p&gt;
+&lt;p&gt;The function responsible for parsing this lobby data does not validate the &lt;code&gt;kick_num&lt;/code&gt; value against the size of the fixed‑length buffer allocated for kicked player identifiers. Supplying a &lt;code&gt;kick_num&lt;/code&gt; value larger than the buffer capacity results in out‑of‑bounds writes into adjacent memory. The memory region immediately following this buffer contains internal Steamworks callback handler structures that store function pointers and callback arguments for processing lobby data changes, messages, and other related events. By manipulating the overflow, an attacker can corrupt these handler structures and redirect callback execution, resulting in control‑flow hijacking on affected client systems. The vulnerability can be triggered automatically when a client joins a lobby controlled by an attacker.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;Exploitation of this vulnerability may allow remote code execution on affected clients. Initial control‑flow hijacking provides access only to existing in‑process code; however, the Metal Gear Online 3 binary includes Denuvo‑protected regions mapped with read‑write‑execute (RWX) permissions. These regions permit runtime injection of attacker‑supplied code, significantly increasing the severity of the issue. An attacker hosting a lobby can achieve code execution on any client that joins, without requiring further interaction from the victim. Additionally, because host privileges are automatically reassigned to another lobby participant when the current host exits, an attacker can obtain host control during an active match and subsequently deliver the malicious lobby data to all connected players. This enables compromise of multiple systems through a single exploitation event.&lt;/p&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;As of this writing, Konami has not released patch notes or an advisory that specifically addresses this vulnerability, but a fix was included in version 1.1.2.9 of the Metal Gear Online 3 executable, &lt;code&gt;mgsvmgo.exe&lt;/code&gt;. The patch also iterated the server and lobby version numbers from 15 to 16 and 150 to 160, respectively, to prevent players on older versions from accessing the online services.&lt;/p&gt;
+&lt;p&gt;This is the latest patch that fixed the vulnerability:&lt;br&gt;
+https://steamdb.info/patchnotes/24176213/&lt;/p&gt;
+&lt;p&gt;The full patch list can be found here:&lt;br&gt;
+https://steamdb.info/app/287700/patchnotes/&lt;/p&gt;
+&lt;h3 id="acknowledgements"&gt;Acknowledgements&lt;/h3&gt;
+&lt;p&gt;Thank you to Alice Cecchetto for reporting this vulnerability. This document was written by Bob Kemerer.&lt;/p&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; Vendor Information &lt;/h3&gt;
+	  
+	  &lt;div id="vendorinfo"&gt;
+	    One or more vendors are listed for this advisory. Please reference the full report for more information.
+	  &lt;/div&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;br/&gt;
+      
+      
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; References &lt;/h3&gt;
+	  &lt;ul&gt;
+	    
+	    
+	    
+            &lt;li&gt;&lt;a href="https://cwe.mitre.org/data/definitions/122.html" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://cwe.mitre.org/data/definitions/122.html&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://store.steampowered.com/app/287700/METAL_GEAR_SOLID_V_THE_PHANTOM_PAIN/" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://store.steampowered.com/app/287700/METAL_GEAR_SOLID_V_THE_PHANTOM_PAIN/&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://steamdb.info/app/287700/" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://steamdb.info/app/287700/&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://steamdb.info/patchnotes/24176213/" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://steamdb.info/patchnotes/24176213/&lt;/a&gt;&lt;/li&gt;
+            
+          
+	  
+	  &lt;/ul&gt;
+	&lt;/div&gt;
+      &lt;/div&gt;
+      
+      &lt;h3&gt;Other Information&lt;/h3&gt;
+        &lt;div class="vulcontent"&gt;
+          &lt;table class="unstriped"&gt;
+            &lt;tbody&gt;
+	      
+              &lt;tr&gt;
+                &lt;td width="200"&gt;&lt;b&gt;CVE IDs:&lt;/b&gt;&lt;/td&gt;
+		&lt;td&gt;
+		
+		
+                &lt;a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=2026-19874"&gt;CVE-2026-19874  &lt;/a&gt;
+		
+                
+		&lt;/td&gt;
+	      &lt;/tr&gt;
+	      
+	      &lt;tr&gt;
+		&lt;td&gt;
+		  &lt;b&gt;Date Public:&lt;/b&gt;
+		&lt;/td&gt;
+                &lt;td&gt;2026-08-24&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date First Published:&lt;/b&gt;&lt;/td&gt;
+                &lt;td id="datefirstpublished"&gt;2026-08-24&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date Last Updated: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;2026-08-24 15:03 UTC&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Document Revision: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;2 &lt;/td&gt;
+              &lt;/tr&gt;
+            &lt;/tbody&gt;
+          &lt;/table&gt;
+	&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="large-3 medium-3 columns" data-sticky-container&gt;
+  &lt;div class="sticky" data-sticky data-anchor="content"&gt;
+    &lt;div class="sidebar-links"&gt;
+      &lt;ul class="menu vertical"&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" rel="noopener"&gt;About vulnerability notes&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="mailto:cert@cert.org?Subject=VU%23728712 Feedback"&gt;Contact us about this vulnerability&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" &gt;Provide a vendor statement&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+
+
+</content></entry><entry><title>VU#431093: TCG TPM 2.0 reference code found vulnerable to information leakage and timing side-channel attacks</title><link href="https://kb.cert.org/vuls/id/431093" rel="alternate"/><published>2026-08-11T15:12:29.297759+00:00</published><updated>2026-08-12T14:23:11.217836+00:00</updated><id>https://kb.cert.org/vuls/id/431093</id><summary type="html">
+
+&lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;Two vulnerabilities have been identified in the Trusted Platform Module (TPM) 2.0 reference implementation:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;CVE-2026-6726&lt;/strong&gt; – Information leakage via falsified TPM keys.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CVE-2026-6727&lt;/strong&gt; – A timing side-channel vulnerability in RSA OAEP decryption.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;An attacker with privileged access to a TPM command interface may be able to exploit these vulnerabilities by sending specially crafted TPM commands. Successful exploitation could allow the attacker to decrypt ciphertexts encrypted to affected TPM-managed RSA keys, including the RSA Endorsement Key (EK), or obtain credentials for falsified TPM keys, enabling forged TPM 2.0 attestations.&lt;br&gt;
+ These vulnerabilities are also documented by the Trusted Computing Group (TCG) in advisories - &lt;a href="https://trustedcomputinggroup.org/about/security/#willa"&gt;&lt;strong&gt;TCGVRT010 and TCGVRT0011&lt;/strong&gt;:&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Trusted Platform Module (TPM) technology provides hardware-backed cryptographic services for modern computing platforms. TPMs are designed to resist tampering and may be implemented as discrete chips, integrated hardware, firmware-based TPMs (fTPMs), or software implementations used in cloud and virtualized environments.&lt;br&gt;
+The Trusted Computing Group (TCG) maintains the TPM specifications and publishes a reference implementation to assist vendors in developing TPM-compliant products.&lt;/p&gt;
+&lt;p&gt;Two vulnerabilities were identified in the TPM 2.0 reference implementation.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-6727&lt;/strong&gt; &lt;br&gt;
+A timing side-channel vulnerability exists in the RSA OAEP decryption implementation. A privileged local attacker with access to the TPM command interface may be able to exploit timing differences to recover information that could allow decryption of ciphertexts encrypted to TPM-managed RSA keys, including the RSA Endorsement Key (EK), including import blobs, credential blobs, and session salts. Under certain conditions, this may also enable the forgery of TPM 2.0 attestations.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-6726&lt;/strong&gt;&lt;br&gt;
+An information leakage vulnerability could allow a privileged local attacker to obtain credentials from a TPM-aware Certificate Authority (CA) for a falsified TPM key, such as an Attestation Key (AK), DevID key, or TLS authentication key. This could enable the creation of fraudulent TPM 2.0 attestations using the forged key.&lt;/p&gt;
+&lt;p&gt;Both vulnerabilities require privileged access to the TPM command interface. Multiple vendors have released firmware and software updates incorporating fixes from the updated TPM 2.0 reference implementation.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;Successful exploitation requires privileged local access to a TPM command interface. Depending on the vulnerability exploited, an attacker may be able to:&lt;br&gt;
+- Decrypt ciphertexts encrypted to the TPM-managed RS keys, including the RSA Endorsement Key (EK), , including credential blobs, import blobs, and session salts.&lt;br&gt;
+- Obtain credentials for falsified TPM keys.&lt;br&gt;
+- Produce fraudulent TPM 2.0 attestations that appear to originate from a legitimate TPM.&lt;/p&gt;
+&lt;p&gt;The overall impact depends on the affected TPM implementation and how TPM-based attestation and key management are used by the platform. &lt;/p&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;The vulnerabilities originate in the TPM 2.0 reference implementation, and TPM vendors have incorporated the corresponding fixes into updated firmware and software releases. Users should install TPM firmware updates, operating system updates, or software patches provided by their platform or TPM vendor.&lt;/p&gt;
+&lt;p&gt;Cloud providers using software-based TPM implementations may also have deployed updates. Customers should consult their cloud provider's guidance to determine whether any additional action is required. See the &lt;strong&gt;Vendor Information&lt;/strong&gt; section for product-specific remediation guidance.&lt;/p&gt;
+&lt;h2 id="acknowledgements"&gt;Acknowledgements&lt;/h2&gt;
+&lt;p&gt;Thanks to security researchers Liran Perez, Zecharye Galitzky, Shai Sarfati, and Yanai Moyal from Intel for reporting these vulnerabilities.  Thanks to members of the Trusted Computing Group’s Vulnerability Response Team, TCG VRT, for working with CERT/CC towards this multi-party vulnerability disclosure. This document was written by Vijay Sarvepalli.&lt;/p&gt;
+
+</summary><content type="html">
+
+&lt;div class="row" id="content"&gt;
+  &lt;div class="large-9 medium-9 columns"&gt;
+    &lt;div class="blog-post"&gt;
+      &lt;div class="row"&gt;
+        &lt;div class="large-12 columns"&gt;
+	  
+	  &lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;Two vulnerabilities have been identified in the Trusted Platform Module (TPM) 2.0 reference implementation:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;CVE-2026-6726&lt;/strong&gt; – Information leakage via falsified TPM keys.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CVE-2026-6727&lt;/strong&gt; – A timing side-channel vulnerability in RSA OAEP decryption.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;An attacker with privileged access to a TPM command interface may be able to exploit these vulnerabilities by sending specially crafted TPM commands. Successful exploitation could allow the attacker to decrypt ciphertexts encrypted to affected TPM-managed RSA keys, including the RSA Endorsement Key (EK), or obtain credentials for falsified TPM keys, enabling forged TPM 2.0 attestations.&lt;br&gt;
+ These vulnerabilities are also documented by the Trusted Computing Group (TCG) in advisories - &lt;a href="https://trustedcomputinggroup.org/about/security/#willa"&gt;&lt;strong&gt;TCGVRT010 and TCGVRT0011&lt;/strong&gt;:&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Trusted Platform Module (TPM) technology provides hardware-backed cryptographic services for modern computing platforms. TPMs are designed to resist tampering and may be implemented as discrete chips, integrated hardware, firmware-based TPMs (fTPMs), or software implementations used in cloud and virtualized environments.&lt;br&gt;
+The Trusted Computing Group (TCG) maintains the TPM specifications and publishes a reference implementation to assist vendors in developing TPM-compliant products.&lt;/p&gt;
+&lt;p&gt;Two vulnerabilities were identified in the TPM 2.0 reference implementation.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-6727&lt;/strong&gt; &lt;br&gt;
+A timing side-channel vulnerability exists in the RSA OAEP decryption implementation. A privileged local attacker with access to the TPM command interface may be able to exploit timing differences to recover information that could allow decryption of ciphertexts encrypted to TPM-managed RSA keys, including the RSA Endorsement Key (EK), including import blobs, credential blobs, and session salts. Under certain conditions, this may also enable the forgery of TPM 2.0 attestations.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-6726&lt;/strong&gt;&lt;br&gt;
+An information leakage vulnerability could allow a privileged local attacker to obtain credentials from a TPM-aware Certificate Authority (CA) for a falsified TPM key, such as an Attestation Key (AK), DevID key, or TLS authentication key. This could enable the creation of fraudulent TPM 2.0 attestations using the forged key.&lt;/p&gt;
+&lt;p&gt;Both vulnerabilities require privileged access to the TPM command interface. Multiple vendors have released firmware and software updates incorporating fixes from the updated TPM 2.0 reference implementation.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;Successful exploitation requires privileged local access to a TPM command interface. Depending on the vulnerability exploited, an attacker may be able to:&lt;br&gt;
+- Decrypt ciphertexts encrypted to the TPM-managed RS keys, including the RSA Endorsement Key (EK), , including credential blobs, import blobs, and session salts.&lt;br&gt;
+- Obtain credentials for falsified TPM keys.&lt;br&gt;
+- Produce fraudulent TPM 2.0 attestations that appear to originate from a legitimate TPM.&lt;/p&gt;
+&lt;p&gt;The overall impact depends on the affected TPM implementation and how TPM-based attestation and key management are used by the platform. &lt;/p&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;The vulnerabilities originate in the TPM 2.0 reference implementation, and TPM vendors have incorporated the corresponding fixes into updated firmware and software releases. Users should install TPM firmware updates, operating system updates, or software patches provided by their platform or TPM vendor.&lt;/p&gt;
+&lt;p&gt;Cloud providers using software-based TPM implementations may also have deployed updates. Customers should consult their cloud provider's guidance to determine whether any additional action is required. See the &lt;strong&gt;Vendor Information&lt;/strong&gt; section for product-specific remediation guidance.&lt;/p&gt;
+&lt;h2 id="acknowledgements"&gt;Acknowledgements&lt;/h2&gt;
+&lt;p&gt;Thanks to security researchers Liran Perez, Zecharye Galitzky, Shai Sarfati, and Yanai Moyal from Intel for reporting these vulnerabilities.  Thanks to members of the Trusted Computing Group’s Vulnerability Response Team, TCG VRT, for working with CERT/CC towards this multi-party vulnerability disclosure. This document was written by Vijay Sarvepalli.&lt;/p&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; Vendor Information &lt;/h3&gt;
+	  
+	  &lt;div id="vendorinfo"&gt;
+	    One or more vendors are listed for this advisory. Please reference the full report for more information.
+	  &lt;/div&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;br/&gt;
+      
+      
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; References &lt;/h3&gt;
+	  &lt;ul&gt;
+	    
+	    
+	    
+            &lt;li&gt;&lt;a href="https://trustedcomputinggroup.org/about/security/" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://trustedcomputinggroup.org/about/security/&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://trustedcomputinggroup.org/resource/tpm-library-specification/" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://trustedcomputinggroup.org/resource/tpm-library-specification/&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://trustedcomputinggroup.org/resource/errata-for-tpm-library-specification-2-0/" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://trustedcomputinggroup.org/resource/errata-for-tpm-library-specification-2-0/&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://trustedcomputinggroup.org/wp-content/uploads/VRT0010-Advisory_Final-1.pdf" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://trustedcomputinggroup.org/wp-content/uploads/VRT0010-Advisory_Final-1.pdf&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://trustedcomputinggroup.org/wp-content/uploads/VRT0010-Advisory_Final-1.pdf" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://trustedcomputinggroup.org/wp-content/uploads/VRT0010-Advisory_Final-1.pdf&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://trustedcomputinggroup.org/wp-content/uploads/Extended-vrt0010-11-guidance_V1.pdf" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://trustedcomputinggroup.org/wp-content/uploads/Extended-vrt0010-11-guidance_V1.pdf&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://trustedcomputinggroup.org/wp-content/uploads/Extended-vrt0010-11-guidance_V1.pdf" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://trustedcomputinggroup.org/wp-content/uploads/Extended-vrt0010-11-guidance_V1.pdf&lt;/a&gt;&lt;/li&gt;
+            
+          
+	  
+	  &lt;/ul&gt;
+	&lt;/div&gt;
+      &lt;/div&gt;
+      
+      &lt;h3&gt;Other Information&lt;/h3&gt;
+        &lt;div class="vulcontent"&gt;
+          &lt;table class="unstriped"&gt;
+            &lt;tbody&gt;
+	      
+              &lt;tr&gt;
+                &lt;td width="200"&gt;&lt;b&gt;CVE IDs:&lt;/b&gt;&lt;/td&gt;
+		&lt;td&gt;
+		
+		
+                &lt;a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=2026-6726"&gt;CVE-2026-6726  &lt;/a&gt;
+		
+                
+		
+                &lt;a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=2026-6727"&gt;CVE-2026-6727  &lt;/a&gt;
+		
+                
+		&lt;/td&gt;
+	      &lt;/tr&gt;
+	      
+	      &lt;tr&gt;
+		&lt;td&gt;
+		  &lt;b&gt;Date Public:&lt;/b&gt;
+		&lt;/td&gt;
+                &lt;td&gt;2026-08-11&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date First Published:&lt;/b&gt;&lt;/td&gt;
+                &lt;td id="datefirstpublished"&gt;2026-08-11&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date Last Updated: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;2026-08-12 14:23 UTC&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Document Revision: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;3 &lt;/td&gt;
+              &lt;/tr&gt;
+            &lt;/tbody&gt;
+          &lt;/table&gt;
+	&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="large-3 medium-3 columns" data-sticky-container&gt;
+  &lt;div class="sticky" data-sticky data-anchor="content"&gt;
+    &lt;div class="sidebar-links"&gt;
+      &lt;ul class="menu vertical"&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" rel="noopener"&gt;About vulnerability notes&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="mailto:cert@cert.org?Subject=VU%23431093 Feedback"&gt;Contact us about this vulnerability&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" &gt;Provide a vendor statement&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+
+
+</content></entry><entry><title>VU#487613: Alinto SOGo v5.12.7 vulnerable to cross-site scripting via malformed ICS calendar invitations</title><link href="https://kb.cert.org/vuls/id/487613" rel="alternate"/><published>2026-08-06T18:36:37.747196+00:00</published><updated>2026-08-18T19:57:56.920153+00:00</updated><id>https://kb.cert.org/vuls/id/487613</id><summary type="html">
+
+&lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;A cross-site scripting (XSS) vulnerability in Alinto SOGo v5.12.7 allows attackers to achieve remote code execution by embedding malicious SVG (Scalable Vector Graphics) objects in ICS (iCalendar) invitations. The vulnerability has been actively exploited in the wild, as confirmed by VirusTotal sightings.&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Alinto SOGo is an open-source webmail and groupware platform for email, calendars, contacts, and shared scheduling. It is primarily used by organizations seeking a self-hosted interface solution for existing mail infrastructure.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-8496&lt;/strong&gt;&lt;br&gt;
+The vulnerability exists in SOGo’s handling of ICS files, where the &lt;code&gt;DESCRIPTION&lt;/code&gt; field is rendered without proper sanitization or Content Security Policy (CSP) enforcement. When a calendar invite contains an SVG payload, such as &lt;code&gt;&amp;lt;animate onrepeat='...'&amp;gt;&lt;/code&gt;, with JavaScript event handlers, the browser executes the script in the context of the SOGo webmail interface. This occurs during normal calendar view rendering (e.g., when a user opens or previews the calendar tab), even without explicit interaction.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;Once an attacker delivers a malicious ICS file via email, any user who views the calendar will execute the embedded XSS payload, granting the attacker full read access to the victim's mailbox. This enables:  &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Credential theft through forced logout/login phishing&lt;/li&gt;
+&lt;li&gt;Password manager autofill hijacking&lt;/li&gt;
+&lt;li&gt;Full exfiltration of email messages, folder contents, and metadata&lt;/li&gt;
+&lt;li&gt;Extraction of contact lists and calendar data&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;Users are recommended to upgrade to SOGo v5.12.8 or newer. v5.12.8 addresses this issue via sanitizing ICS &lt;code&gt;DESCRIPTION&lt;/code&gt; content and stricter handling of embedded SVG and HTML. &lt;/p&gt;
+&lt;h3 id="acknowledgements"&gt;Acknowledgements&lt;/h3&gt;
+&lt;p&gt;Thank you to Greg Lesnewich for reporting this issue. This AI-assisted vulnerability note was prepared by Alexander Curtis.&lt;/p&gt;
+
+</summary><content type="html">
+
+&lt;div class="row" id="content"&gt;
+  &lt;div class="large-9 medium-9 columns"&gt;
+    &lt;div class="blog-post"&gt;
+      &lt;div class="row"&gt;
+        &lt;div class="large-12 columns"&gt;
+	  
+	  &lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;A cross-site scripting (XSS) vulnerability in Alinto SOGo v5.12.7 allows attackers to achieve remote code execution by embedding malicious SVG (Scalable Vector Graphics) objects in ICS (iCalendar) invitations. The vulnerability has been actively exploited in the wild, as confirmed by VirusTotal sightings.&lt;/p&gt;
+&lt;h3 id="description"&gt;Description&lt;/h3&gt;
+&lt;p&gt;Alinto SOGo is an open-source webmail and groupware platform for email, calendars, contacts, and shared scheduling. It is primarily used by organizations seeking a self-hosted interface solution for existing mail infrastructure.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CVE-2026-8496&lt;/strong&gt;&lt;br&gt;
+The vulnerability exists in SOGo’s handling of ICS files, where the &lt;code&gt;DESCRIPTION&lt;/code&gt; field is rendered without proper sanitization or Content Security Policy (CSP) enforcement. When a calendar invite contains an SVG payload, such as &lt;code&gt;&amp;lt;animate onrepeat='...'&amp;gt;&lt;/code&gt;, with JavaScript event handlers, the browser executes the script in the context of the SOGo webmail interface. This occurs during normal calendar view rendering (e.g., when a user opens or previews the calendar tab), even without explicit interaction.&lt;/p&gt;
+&lt;h3 id="impact"&gt;Impact&lt;/h3&gt;
+&lt;p&gt;Once an attacker delivers a malicious ICS file via email, any user who views the calendar will execute the embedded XSS payload, granting the attacker full read access to the victim's mailbox. This enables:  &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Credential theft through forced logout/login phishing&lt;/li&gt;
+&lt;li&gt;Password manager autofill hijacking&lt;/li&gt;
+&lt;li&gt;Full exfiltration of email messages, folder contents, and metadata&lt;/li&gt;
+&lt;li&gt;Extraction of contact lists and calendar data&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;Users are recommended to upgrade to SOGo v5.12.8 or newer. v5.12.8 addresses this issue via sanitizing ICS &lt;code&gt;DESCRIPTION&lt;/code&gt; content and stricter handling of embedded SVG and HTML. &lt;/p&gt;
+&lt;h3 id="acknowledgements"&gt;Acknowledgements&lt;/h3&gt;
+&lt;p&gt;Thank you to Greg Lesnewich for reporting this issue. This AI-assisted vulnerability note was prepared by Alexander Curtis.&lt;/p&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; Vendor Information &lt;/h3&gt;
+	  
+	  &lt;div id="vendorinfo"&gt;
+	    One or more vendors are listed for this advisory. Please reference the full report for more information.
+	  &lt;/div&gt;
+	  
+	&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;br/&gt;
+      
+      
+      &lt;div class="row"&gt;
+	&lt;div class="large-12 columns"&gt;
+	  &lt;h3&gt; References &lt;/h3&gt;
+	  &lt;ul&gt;
+	    
+	    
+	    
+            &lt;li&gt;&lt;a href="https://github.com/Alinto/sogo/commit/67ce01ec2a1a7854d8e9f615dd65afb949043e86" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://github.com/Alinto/sogo/commit/67ce01ec2a1a7854d8e9f615dd65afb949043e86&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://github.com/Alinto/sogo/releases/tag/SOGo-5.12.8" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://github.com/Alinto/sogo/releases/tag/SOGo-5.12.8&lt;/a&gt;&lt;/li&gt;
+            
+          
+	    
+            &lt;li&gt;&lt;a href="https://www.sogo.nu/news/2026/sogo-v5128-released.html" class="vulreflink safereflink" target="_blank" rel="noopener"&gt;https://www.sogo.nu/news/2026/sogo-v5128-released.html&lt;/a&gt;&lt;/li&gt;
+            
+          
+	  
+	  &lt;/ul&gt;
+	&lt;/div&gt;
+      &lt;/div&gt;
+      
+      &lt;h3&gt;Other Information&lt;/h3&gt;
+        &lt;div class="vulcontent"&gt;
+          &lt;table class="unstriped"&gt;
+            &lt;tbody&gt;
+	      
+              &lt;tr&gt;
+                &lt;td width="200"&gt;&lt;b&gt;CVE IDs:&lt;/b&gt;&lt;/td&gt;
+		&lt;td&gt;
+		
+		
+                &lt;a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=2026-8496"&gt;CVE-2026-8496  &lt;/a&gt;
+		
+                
+		&lt;/td&gt;
+	      &lt;/tr&gt;
+	      
+	      &lt;tr&gt;
+		&lt;td&gt;
+		  &lt;b&gt;Date Public:&lt;/b&gt;
+		&lt;/td&gt;
+                &lt;td&gt;2026-08-06&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date First Published:&lt;/b&gt;&lt;/td&gt;
+                &lt;td id="datefirstpublished"&gt;2026-08-06&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Date Last Updated: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;2026-08-18 19:57 UTC&lt;/td&gt;
+              &lt;/tr&gt;
+              &lt;tr&gt;
+                &lt;td&gt;&lt;b&gt;Document Revision: &lt;/b&gt;&lt;/td&gt;
+                &lt;td&gt;5 &lt;/td&gt;
+              &lt;/tr&gt;
+            &lt;/tbody&gt;
+          &lt;/table&gt;
+	&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="large-3 medium-3 columns" data-sticky-container&gt;
+  &lt;div class="sticky" data-sticky data-anchor="content"&gt;
+    &lt;div class="sidebar-links"&gt;
+      &lt;ul class="menu vertical"&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" rel="noopener"&gt;About vulnerability notes&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="mailto:cert@cert.org?Subject=VU%23487613 Feedback"&gt;Contact us about this vulnerability&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href="" target="_blank" &gt;Provide a vendor statement&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+
+
+</content></entry></feed>

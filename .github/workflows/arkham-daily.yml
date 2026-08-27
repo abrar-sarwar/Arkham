@@ -1,0 +1,111 @@
+name: Arkham daily briefing
+
+# GitHub Actions cron runs in UTC only. 08:00 America/New_York is 12:00 UTC during daylight time (EDT)
+# and 13:00 UTC during standard time (EST). Both crons fire; the `should-run` gate (zoneinfo-aware)
+# lets exactly the right one proceed and refuses to double-send. Regenerate with: python -m arkham next-run
+#
+# Delivery: Discord incoming webhook (free). The ONLY delivery secret is DISCORD_WEBHOOK_URL. It is passed
+# to the process as an environment variable and never echoed: Arkham masks it in every log line and error,
+# GitHub masks registered secrets in workflow logs, and no step prints configuration or the brief.
+#
+# Duplicate-send protection on retries/reruns: the SQLite state (restored from the Actions cache) records
+# every successful delivery; a rerun inside 20 hours is refused by Arkham itself, the `concurrency` group
+# prevents two jobs overlapping, and a failed Discord delivery leaves the events un-briefed so the next
+# run delivers them exactly once.
+on:
+  schedule:
+    - cron: '0 12 * * *'
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'dry-run prints the brief in the log (public repo!) — test-delivery posts one small test message — force sends the brief now'
+        required: true
+        default: dry-run
+        type: choice
+        options: [dry-run, test-delivery, force]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arkham-daily
+  cancel-in-progress: false
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ARKHAM_TIMEZONE: ${{ vars.ARKHAM_TIMEZONE || 'America/New_York' }}
+      ARKHAM_DELIVERY_HOUR: ${{ vars.ARKHAM_DELIVERY_HOUR || '8' }}
+      ARKHAM_DELIVERY_PROVIDER: ${{ vars.ARKHAM_DELIVERY_PROVIDER || 'discord' }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_BASE_URL: ${{ vars.GEMINI_BASE_URL }}
+      # To use another analyst provider (openai/anthropic), add its key here as a secret and set LLM_PROVIDER.
+      LLM_INPUT_PRICE_PER_1M: ${{ vars.LLM_INPUT_PRICE_PER_1M }}
+      LLM_OUTPUT_PRICE_PER_1M: ${{ vars.LLM_OUTPUT_PRICE_PER_1M }}
+      ARKHAM_MAX_EVENTS: ${{ vars.ARKHAM_MAX_EVENTS || '8' }}
+      ARKHAM_MIN_PRIORITY_SCORE: ${{ vars.ARKHAM_MIN_PRIORITY_SCORE }}
+      ARKHAM_DISABLED_SOURCES: ${{ vars.ARKHAM_DISABLED_SOURCES }}
+      ARKHAM_DB_PATH: data/arkham.db
+      ARKHAM_LOG_FORMAT: text
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install pinned dependencies
+        run: python -m pip install -r requirements.txt
+
+      # The SQLite state (seen events, briefed history, delivery records, source ETags) lives in the
+      # Actions cache. Keys are unique per run; restore-keys picks the most recent previous state, which
+      # is also what a rerun of a delivered run sees — so the 20-hour delivery guard holds across reruns.
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: arkham-state-${{ github.run_id }}
+          restore-keys: |
+            arkham-state-
+
+      - name: Decide whether this scheduled invocation is the 08:00 local one
+        id: gate
+        if: github.event_name == 'schedule'
+        run: |
+          set +e
+          python -m arkham --env-file /dev/null should-run
+          code=$?
+          set -e
+          if [ "$code" = "0" ]; then echo "proceed=true" >> "$GITHUB_OUTPUT"; else echo "proceed=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Run Arkham (scheduled) — logs metrics only, never the brief or the webhook
+        if: github.event_name == 'schedule' && steps.gate.outputs.proceed == 'true'
+        run: python -m arkham --env-file /dev/null run
+
+      - name: Run Arkham (manual)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          case "$MODE" in
+            force)         python -m arkham --env-file /dev/null run --force ;;
+            test-delivery) python -m arkham --env-file /dev/null test-delivery ;;
+            *)             python -m arkham --env-file /dev/null run --dry-run ;;
+          esac
+
+      - name: Save state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data
+          key: arkham-state-${{ github.run_id }}

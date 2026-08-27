@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>The Record from Recorded Future News</title>
+        <link>https://therecord.media/feed</link>
+        <description>The Record by Recorded Future News gives exclusive, behind-the-scenes access to leaders, policymakers, researchers, and the shadows of the cyber underground.</description>
+        <lastBuildDate>Wed, 26 Aug 2026 18:35:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>The Record from Recorded Future News</generator>
+        <language>en</language>
+        <copyright>Copyright © 2026 | The Record from Recorded Future News</copyright>
+        <item>
+            <title><![CDATA[Meta pledges to overhaul kids’ safety protections, pay $17 billion to settle social media case]]></title>
+            <link>https://therecord.media/meta-settlement-children-online-safety-social-media</link>
+            <guid>https://therecord.media/meta-settlement-children-online-safety-social-media</guid>
+            <pubDate>Wed, 26 Aug 2026 18:35:00 GMT</pubDate>
+            <description><![CDATA[A multibillion-dollar settlement with attorneys general from nearly every U.S. state and territory will mean new privacy and safety protections in Meta products.]]></description>
+            <category>Privacy</category>
+            <category>News</category>
+            <category>Government</category>
+            <enclosure url="http://cms.therecord.media/uploads/meta_logo_904af79abb.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[US takes down alleged Chinese hacking tools used against Federal Reserve, DOJ and Senate]]></title>
+            <link>https://therecord.media/qscan-qtrouter-us-takedown-alleged-china-hacking-tools</link>
+            <guid>https://therecord.media/qscan-qtrouter-us-takedown-alleged-china-hacking-tools</guid>
+            <pubDate>Wed, 26 Aug 2026 16:25:00 GMT</pubDate>
+            <description><![CDATA[The DOJ said it disrupted Chinese state-backed tools used to scan, infect and exploit IoT devices for attacks on federal agencies and multiple industries. ]]></description>
+            <category>Nation-state</category>
+            <category>China</category>
+            <category>News</category>
+            <category>Malware</category>
+            <category>Government</category>
+            <enclosure url="http://cms.therecord.media/uploads/qtfy_takedown_page_fbi_doj_8ecaf8b8e9.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Iran-linked hackers expand infrastructure across Europe and Middle East, report says]]></title>
+            <link>https://therecord.media/iran-linked-hackers-expand-infrastructure-europe-middle-east</link>
+            <guid>https://therecord.media/iran-linked-hackers-expand-infrastructure-europe-middle-east</guid>
+            <pubDate>Wed, 26 Aug 2026 15:45:00 GMT</pubDate>
+            <description><![CDATA[Researchers said they identified servers and domains associated with several countries in Europe and the Middle East, potentially pointing to a broader targeting profile for an Iranian hacking group.]]></description>
+            <category>Cybercrime</category>
+            <category>Malware</category>
+            <category>News</category>
+            <category>News Briefs</category>
+            <enclosure url="http://cms.therecord.media/uploads/hands_keyboard_hacker_50ed84b072.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[58 arrested in international cybercrime crackdown]]></title>
+            <link>https://therecord.media/58-arrested-international-cybercrime-crackdown-interpol</link>
+            <guid>https://therecord.media/58-arrested-international-cybercrime-crackdown-interpol</guid>
+            <pubDate>Tue, 25 Aug 2026 20:33:00 GMT</pubDate>
+            <description><![CDATA[Interpol officials said it uncovered a crime-as-a-service network in Argentina run by 196 people that provided website domains and money laundering support to West African organized crime groups like Black Axe.]]></description>
+            <category>Cybercrime</category>
+            <category>Government</category>
+            <category>News</category>
+            <enclosure url="http://cms.therecord.media/uploads/G_Av_Q3_TF_Xo_AA_9d1x_531ffe3a2d.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Employee benefits platform Paylogix says hackers stole financial and health data]]></title>
+            <link>https://therecord.media/paylogix-cyberattack-akira-ransomware</link>
+            <guid>https://therecord.media/paylogix-cyberattack-akira-ransomware</guid>
+            <pubDate>Tue, 25 Aug 2026 18:45:00 GMT</pubDate>
+            <description><![CDATA[The benefits management firm Paylogix told regulators that hackers stole sensitive information on tens of thousands of people from its systems.]]></description>
+            <category>News</category>
+            <category>Privacy</category>
+            <category>Cybercrime</category>
+            <enclosure url="http://cms.therecord.media/uploads/Office_workers_ee33ddae80.jpg" length="0" type="image/jpg"/>
+        </item>
+    </channel>
+</rss><!-- generated at 2026-08-26T19:14:53.141Z -->

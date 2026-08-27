@@ -1,0 +1,34 @@
+<rss version="2.0">
+    <channel>
+        <title>Latest publications of type Threat Intelligence</title>
+        <link>https://cert.europa.eu/publications/threat-intelligence/</link>
+        <description>RSS feed for the latest 10 publications of type Threat Intelligence.</description>
+        <ttl>1440</ttl>
+        <language>en-gb</language>
+        <item>
+            <title>Cyber Brief 26-08 - July 2026</title>
+            <link>
+                https://cert.europa.eu/publications/threat-intelligence/cb26-08/
+            </link>
+            <description>Cyber Briefs are monthly executive reports that aim to present an overview of the most relevant developments in cyber security, based exclusively on open sources, with a view to inform political leadership and senior management in its constituency. Additional information on any item in this Brief can be provided upon request. Cyber Briefs are TLP:CLEAR.</description>
+            <pubDate>Mon, 03 Aug 2026 17:00:00 CEST</pubDate>
+            <guid>threat-intelligence-10164</guid>
+        </item><item>
+            <title>Cyber Brief 26-07 - June 2026</title>
+            <link>
+                https://cert.europa.eu/publications/threat-intelligence/cb26-07/
+            </link>
+            <description>Cyber Briefs are monthly executive reports that aim to present an overview of the most relevant developments in cyber security, based exclusively on open sources, with a view to inform political leadership and senior management in its constituency. Additional information on any item in this Brief can be provided upon request. Cyber Briefs are TLP:CLEAR.</description>
+            <pubDate>Wed, 01 Jul 2026 16:00:00 CEST</pubDate>
+            <guid>threat-intelligence-10163</guid>
+        </item><item>
+            <title>Threat Landscape Report 2025 - A Year In Review</title>
+            <link>
+                https://cert.europa.eu/publications/threat-intelligence/tlr2025/
+            </link>
+            <description>CERT-EU Cyber Threat Landscape Report for 2025 - Year Review</description>
+            <pubDate>Wed, 08 Apr 2026 18:00:00 CEST</pubDate>
+            <guid>threat-intelligence-10159</guid>
+        </item>
+    </channel>
+</rss>

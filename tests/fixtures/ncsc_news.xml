@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0" xml:base="https://www.ncsc.gov.uk/">
+  <channel>
+    <title>News Feed</title>
+    <link>https://www.ncsc.gov.uk/</link>
+    <description>This includes feeds from news</description>
+    <language>en</language>
+    
+    <item>
+  <title>NCSC statement in response to recent incidents resulting from frontier AI evaluations</title>
+  <link>https://www.ncsc.gov.uk/news/ncsc-statement-in-response-to-recent-incidents-resulting-from-frontier-ai-evaluations</link>
+  <description>A statement from Ollie Whitehouse, Chief Technology Officer at the NCSC, on AI security following recent incidents.</description>
+  <pubDate>Tue, 04 Aug 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/news/ncsc-statement-in-response-to-recent-incidents-resulting-from-frontier-ai-evaluations</guid>
+    </item>
+<item>
+  <title>UK and partners expose Russian state-supported actors for new ‘zero-click’ phishing campaign targeting Western organisations</title>
+  <link>https://www.ncsc.gov.uk/news/uk-and-partners-expose-russian-state-supported-actors-for-new-zero-click-phishing-campaign</link>
+  <description>GCHQ’s National Cyber Security Centre and international partners issue warning as ‘LAUNDRY BEAR’ cyber threat group exposed for targeted phishing campaign</description>
+  <pubDate>Thu, 23 Jul 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/news/uk-and-partners-expose-russian-state-supported-actors-for-new-zero-click-phishing-campaign</guid>
+    </item>
+<item>
+  <title>Alert: NCSC issues advice following global targeting of Fortinet firewalls and VPN gateways</title>
+  <link>https://www.ncsc.gov.uk/news/advice-following-global-targeting-of-fortinet-firewalls-and-vpn-gateways</link>
+  <description>Organisations using Fortinet services are being urged to take action following a campaign affecting firewalls and VPN gateways.</description>
+  <pubDate>Thu, 18 Jun 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/news/advice-following-global-targeting-of-fortinet-firewalls-and-vpn-gateways</guid>
+    </item>
+<item>
+  <title>Vulnerability affecting F5 BIG-IP APM</title>
+  <link>https://www.ncsc.gov.uk/news/vulnerability-affecting-f5-big-ip-apm</link>
+  <description>The NCSC is encouraging UK organisations to mitigate an unauthenticated remote code execution vulnerability affecting F5 BIG-IP Access Policy Manager.</description>
+  <pubDate>Mon, 30 Mar 2026 12:00:00 +0000</pubDate>
+    <dc:creator/>
+    <guid isPermaLink="true">https://www.ncsc.gov.uk/news/vulnerability-affecting-f5-big-ip-apm</guid>
+    </item>
+
+  </channel>
+</rss>

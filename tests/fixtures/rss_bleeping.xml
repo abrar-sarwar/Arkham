@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+        xmlns:content="http://purl.org/rss/1.0/modules/content/"
+        xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:atom="http://www.w3.org/2005/Atom"
+        >
+
+<channel>
+        <title>BleepingComputer</title>
+
+        <link>https://www.bleepingcomputer.com/</link>
+        <description>BleepingComputer - All Stories</description>
+        <pubDate>Wed, 26 Aug 2026 19:08:25 GMT</pubDate>
+        <generator>https://www.bleepingcomputer.com/</generator>
+        <language>en</language>
+        <atom:link href="https://www.bleepingcomputer.com/feed/" rel="self" type="application/rss+xml" />
+        
+ <item>
+        <title>Hackers target Microsoft SharePoint RCE chain with PoC exploit</title>
+        <link>https://www.bleepingcomputer.com/news/security/hackers-target-microsoft-sharepoint-rce-chain-with-poc-exploit/</link>
+        <pubDate>Wed, 26 Aug 2026 10:47:51 -0400</pubDate>
+        <dc:creator>Sergiu Gatlan</dc:creator>
+        
+        <category><![CDATA[Security]]></category>
+
+        <guid>https://www.bleepingcomputer.com/news/security/hackers-target-microsoft-sharepoint-rce-chain-with-poc-exploit/</guid>
+        <description><![CDATA[Attackers are now targeting a chain of two Microsoft SharePoint vulnerabilities that can allow them to execute arbitrary code on unpatched servers, according to threat intelligence company Defused. [...]]]></description>
+ </item>
+
+ <item>
+        <title>Microsoft tests new privacy controls for Windows 11 desktop apps</title>
+        <link>https://www.bleepingcomputer.com/news/microsoft/microsoft-tests-new-privacy-controls-for-windows-11-desktop-apps/</link>
+        <pubDate>Wed, 26 Aug 2026 08:06:28 -0400</pubDate>
+        <dc:creator>Sergiu Gatlan</dc:creator>
+        
+        <category><![CDATA[Microsoft]]></category>
+
+        <guid>https://www.bleepingcomputer.com/news/microsoft/microsoft-tests-new-privacy-controls-for-windows-11-desktop-apps/</guid>
+        <description><![CDATA[Microsoft has begun testing new privacy controls that will let Windows 11 users choose which desktop applications can access their camera, microphone, and precise location. [...]]]></description>
+ </item>
+
+ <item>
+        <title>Hackers now exploit critical Gitea flaw in code injection attacks</title>
+        <link>https://www.bleepingcomputer.com/news/security/hackers-now-exploit-critical-gitea-flaw-in-code-injection-attacks/</link>
+        <pubDate>Wed, 26 Aug 2026 07:07:48 -0400</pubDate>
+        <dc:creator>Sergiu Gatlan</dc:creator>
+        
+        <category><![CDATA[Security]]></category>
+
+        <guid>https://www.bleepingcomputer.com/news/security/hackers-now-exploit-critical-gitea-flaw-in-code-injection-attacks/</guid>
+        <description><![CDATA[Attackers are now exploiting a critical-severity vulnerability in the Gitea self-hosted Git service, according to the U.S. Cybersecurity and Infrastructure Security Agency (CISA). [...]]]></description>
+ </item>
+
+ <item>
+        <title>LACMA data breach last year exposed social security and medical data</title>
+        <link>https://www.bleepingcomputer.com/news/security/lacma-data-breach-last-year-exposed-social-security-and-medical-data/</link>
+        <pubDate>Tue, 25 Aug 2026 17:58:14 -0400</pubDate>
+        <dc:creator>Bill Toulas</dc:creator>
+        
+        <category><![CDATA[Security]]></category>
+
+        <guid>https://www.bleepingcomputer.com/news/security/lacma-data-breach-last-year-exposed-social-security-and-medical-data/</guid>
+        <description><![CDATA[The Los Angeles County Museum of Art (LACMA) has announced that a breach last year exposed customer and employee information. [...]]]></description>
+ </item>
+
+</channel>
+</rss>

