@@ -31,7 +31,7 @@ from arkham.models import (
     LLMUsage,
     RunRecord,
 )
-from arkham.schedule import recently_delivered
+from arkham.schedule import already_delivered
 from arkham.storage.base import Storage
 
 log = logging.getLogger(__name__)
@@ -195,8 +195,8 @@ def execute_run(
             if delivery_problems:
                 raise ConfigError("Delivery configuration incomplete:\n  - " + "\n  - ".join(delivery_problems))
             last_delivered = storage.get_last_successful_run(delivered_only=True)
-            if recently_delivered(last_delivered, now) and not options.force:
-                raise ConfigError("A briefing was already delivered in the last 20 hours; use --force to send another.")
+            if already_delivered(last_delivered, now, settings.tzinfo, settings.delivery_hour) and not options.force:
+                raise ConfigError("Today's briefing was already delivered; use --force to send another.")
 
         # ---- window
         last_delivered = storage.get_last_successful_run(delivered_only=True)

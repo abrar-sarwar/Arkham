@@ -8,8 +8,6 @@ from zoneinfo import ZoneInfo
 from arkham.config import Settings
 from arkham.models import RunRecord
 
-REDELIVERY_GUARD_HOURS = 20
-
 
 def local_now(now: datetime, tz: ZoneInfo) -> datetime:
     return now.astimezone(tz)
@@ -25,8 +23,14 @@ def next_run_time(now: datetime, tz: ZoneInfo, hour: int) -> datetime:
     return candidate
 
 
-def is_delivery_hour(now: datetime, tz: ZoneInfo, hour: int) -> bool:
-    return now.astimezone(tz).hour == hour
+def delivery_slot_start(now: datetime, tz: ZoneInfo, hour: int) -> datetime:
+    """Most recent ``hour``:00 local time at or before ``now``; one briefing is owed per slot (DST-safe)."""
+    local = now.astimezone(tz)
+    start = local.replace(hour=hour, minute=0, second=0, microsecond=0)
+    if start > local:
+        prev_day = (local - timedelta(days=1)).date()
+        start = datetime(prev_day.year, prev_day.month, prev_day.day, hour, tzinfo=tz)
+    return start
 
 
 def utc_hours_for_local_hour(tz: ZoneInfo, hour: int, year: int) -> list[int]:
@@ -44,19 +48,24 @@ def github_cron_lines(tz: ZoneInfo, hour: int, year: int) -> list[str]:
     return [f"0 {h} * * *" for h in utc_hours_for_local_hour(tz, hour, year)]
 
 
-def recently_delivered(last_delivered: RunRecord | None, now: datetime) -> bool:
+def already_delivered(last_delivered: RunRecord | None, now: datetime, tz: ZoneInfo, hour: int) -> bool:
+    """True when a briefing has gone out since the current delivery slot opened."""
     if last_delivered is None or last_delivered.finished_at is None:
         return False
-    return now - last_delivered.finished_at < timedelta(hours=REDELIVERY_GUARD_HOURS)
+    return last_delivered.finished_at >= delivery_slot_start(now, tz, hour)
 
 
 def should_run(now: datetime, settings: Settings, last_delivered: RunRecord | None) -> tuple[bool, str]:
-    """Gate used by external schedulers that can only fire in UTC (e.g. GitHub Actions)."""
+    """Gate used by external schedulers that can only fire in UTC (e.g. GitHub Actions).
+
+    Such schedulers start late (GitHub cron routinely by hours), so the gate opens at the delivery hour
+    and stays open for the rest of the local day until that day's briefing has gone out.
+    """
     tz = settings.tzinfo
     local = now.astimezone(tz)
-    if not is_delivery_hour(now, tz, settings.delivery_hour):
+    if local.hour < settings.delivery_hour:
         return False, f"local time is {local:%H:%M %Z}; delivery hour is {settings.delivery_hour:02d}:00"
-    if recently_delivered(last_delivered, now):
+    if already_delivered(last_delivered, now, tz, settings.delivery_hour):
         assert last_delivered is not None and last_delivered.finished_at is not None
         return False, f"already delivered at {last_delivered.finished_at.astimezone(tz):%Y-%m-%d %H:%M %Z}"
-    return True, f"local time is {local:%H:%M %Z}; no delivery in the last {REDELIVERY_GUARD_HOURS}h"
+    return True, f"local time is {local:%H:%M %Z}; today's briefing has not been delivered"

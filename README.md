@@ -314,7 +314,7 @@ python -m arkham sources --check    # fetch every enabled source live and print 
 LLM_PROVIDER=template python -m arkham run --dry-run  # zero-credential full pipeline; sends nothing
 python -m arkham run --dry-run --show-evidence   # also prints the exact evidence pack the model received
 python -m arkham test-delivery      # posts ONE small labelled test message to the configured Discord channel
-python -m arkham run --force        # posts a real briefing to the channel now (bypasses the 20-hour guard)
+python -m arkham run --force        # posts a real briefing to the channel now (bypasses the once-per-day guard)
 python -m arkham history            # run records: sources, raw, unique, candidates, selected, tokens, delivery
 python -m arkham search "APT28"     # search stored events (seed of the future `arkham ask`)
 ```
@@ -327,7 +327,7 @@ A dry run needs the LLM configured **or** `LLM_PROVIDER=template`; it never need
 
 ### Default: GitHub Actions (no always-on server)
 
-`.github/workflows/arkham-daily.yml` runs the pipeline daily. GitHub cron is UTC-only, so two crons fire (`0 12 * * *` for EDT, `0 13 * * *` for EST) and a zoneinfo-aware gate — `python -m arkham should-run` — lets exactly the 08:00 America/New_York invocation proceed and refuses a second delivery within 20 hours. DST is handled by `zoneinfo`, not by hand; `python -m arkham next-run` prints the cron lines for any timezone/hour.
+`.github/workflows/arkham-daily.yml` runs the pipeline daily. GitHub cron is UTC-only, so two crons fire (`0 12 * * *` for EDT, `0 13 * * *` for EST) and a zoneinfo-aware gate — `python -m arkham should-run` — lets the first invocation that starts at or after 08:00 America/New_York proceed and refuses a second delivery the same local day. DST is handled by `zoneinfo`, not by hand; `python -m arkham next-run` prints the cron lines for any timezone/hour.
 
 Setup:
 
@@ -335,9 +335,9 @@ Setup:
 2. **Variables**: `LLM_MODEL` (required), optionally `LLM_PROVIDER` (workflow default `gemini`), `ARKHAM_LLM_TIMEOUT_SECONDS` (default `180`), `ARKHAM_DELIVERY_PROVIDER` (default `discord`), pricing variables, `ARKHAM_DISABLED_SOURCES`.
 3. Actions → *Arkham daily briefing* → *Run workflow* with `test-delivery` to post one small test message, `dry-run` to see a brief in the log (**the repository is public: a dry-run prints the brief in a public log; scheduled runs print metrics only**), or `force` to post a real brief now.
 
-Secrets are injected as environment variables only; no step echoes configuration, and Arkham masks the webhook URL in every log line, error and run record (GitHub additionally masks registered secrets in workflow output). Behaviour by scenario: a **quiet run** posts one short "No material updates" message; a **successful delivery** records the message count, attempts and Discord message ids and marks the stories briefed; a **failed delivery** (after bounded retries) fails the job, records the failure, and leaves the stories un-briefed so the next run delivers them; a **workflow retry or manual rerun** restores the same cached state and is refused by the 20-hour delivery guard (`concurrency` also prevents overlapping jobs), so the same briefing is never posted twice.
+Secrets are injected as environment variables only; no step echoes configuration, and Arkham masks the webhook URL in every log line, error and run record (GitHub additionally masks registered secrets in workflow output). Behaviour by scenario: a **quiet run** posts one short "No material updates" message; a **successful delivery** records the message count, attempts and Discord message ids and marks the stories briefed; a **failed delivery** (after bounded retries) fails the job, records the failure, and leaves the stories un-briefed so the next run delivers them; a **workflow retry or manual rerun** restores the same cached state and is refused by the once-per-day delivery guard (`concurrency` also prevents overlapping jobs), so the same briefing is never posted twice.
 
-State (seen events, briefed history, delivery records, ETags) is persisted between runs with `actions/cache` (`data/`), restored from the most recent key each morning. GitHub may delay scheduled jobs by minutes on busy days; the gate tolerates the whole 08:xx hour.
+State (seen events, briefed history, delivery records, ETags) is persisted between runs with `actions/cache` (`data/`), restored from the most recent key each morning. GitHub starts scheduled jobs late — often by hours — so the gate stays open from 08:00 until the end of the local day: the briefing goes out whenever the first invocation actually starts, once per day.
 
 ### Alternative: AWS Lambda + EventBridge Scheduler
 
@@ -410,7 +410,7 @@ Tests cover source normalization for every adapter (captured feed samples), CVE/
 * Journalism-only stories are capped at LOW confidence; this is intentional and means some real incidents are phrased as "reported".
 * Google Project Zero's feed is ~13 MB and disabled by default. Sophos's configured feed path is unavailable. CISA Advisories/Alerts are disabled because the hardened client receives HTTP 403. The normal MSRC blog has no usable feed; the MSRC Update Guide and Microsoft Security Blog are distinct working sources.
 * GitHub Actions scheduling is best-effort (minutes of drift). The AWS path is exact.
-* Discord webhooks have no idempotency key: a request that times out after Discord stored the message could be retried into a duplicate embed. Retries are bounded (4 attempts per message) so this is rare and small; the 20-hour guard prevents whole-brief duplicates across runs.
+* Discord webhooks have no idempotency key: a request that times out after Discord stored the message could be retried into a duplicate embed. Retries are bounded (4 attempts per message) so this is rare and small; the once-per-day guard prevents whole-brief duplicates across runs.
 * Anyone holding the webhook URL can post into the channel; rotate it in Discord if it leaks. Arkham never prints or stores it, but it lives in your `.env` and in the Actions secret.
 * Legacy SMS only: Twilio trial accounts can only message verified numbers; a successful create response means accepted/queued, not delivered.
 * GitHub Actions cache retention is platform-controlled. If the cache is evicted, Arkham starts safely with an empty history; it cannot reconstruct prior briefing memory without a database backup.

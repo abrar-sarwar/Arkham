@@ -527,6 +527,18 @@ def test_redelivery_guard_and_force():
     assert tomorrow.sent and tomorrow.run.window_start == forced.run.window_end - timedelta(hours=1)
 
 
+def test_late_delivery_does_not_block_the_next_days_run():
+    # A scheduler that starts hours late one day and less late the next leaves under 24h between runs;
+    # the guard is one briefing per local day, not a fixed number of hours.
+    settings = load_settings(FULL_ENV, dotenv_path=None)
+    storage = MemoryStorage()
+    h = build_components()
+    late = execute_run(settings, RunOptions(), storage=storage, now=NOW + timedelta(hours=9, minutes=34), components=h.components)
+    assert late.sent  # 17:34 EDT
+    next_day = execute_run(settings, RunOptions(), storage=storage, now=NOW + timedelta(hours=26, minutes=8), components=h.components)
+    assert next_day.sent and len(h.provider.sent) == 2  # 10:08 EDT, 16.5h later
+
+
 def test_delivery_failure_is_recorded_and_events_not_marked_briefed():
     settings = load_settings(FULL_ENV, dotenv_path=None)
     storage = MemoryStorage()

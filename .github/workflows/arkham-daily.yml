@@ -2,14 +2,16 @@ name: Arkham daily briefing
 
 # GitHub Actions cron runs in UTC only. 08:00 America/New_York is 12:00 UTC during daylight time (EDT)
 # and 13:00 UTC during standard time (EST). Both crons fire; the `should-run` gate (zoneinfo-aware)
-# lets exactly the right one proceed and refuses to double-send. Regenerate with: python -m arkham next-run
+# lets the first one that starts at or after 08:00 local proceed and refuses to double-send. GitHub starts
+# scheduled jobs late (often by hours), so the gate stays open for the rest of the local day rather than
+# only the 08:xx hour. Regenerate with: python -m arkham next-run
 #
 # Delivery: Discord incoming webhook (free). The ONLY delivery secret is DISCORD_WEBHOOK_URL. It is passed
 # to the process as an environment variable and never echoed: Arkham masks it in every log line and error,
 # GitHub masks registered secrets in workflow logs, and no step prints configuration or the brief.
 #
 # Duplicate-send protection on retries/reruns: the SQLite state (restored from the Actions cache) records
-# every successful delivery; a rerun inside 20 hours is refused by Arkham itself, the `concurrency` group
+# every successful delivery; a rerun on the same local day is refused by Arkham itself, the `concurrency` group
 # prevents two jobs overlapping, and a failed Discord delivery leaves the events un-briefed so the next
 # run delivers them exactly once.
 on:
@@ -70,7 +72,7 @@ jobs:
 
       # The SQLite state (seen events, briefed history, delivery records, source ETags) lives in the
       # Actions cache. Keys are unique per run; restore-keys picks the most recent previous state, which
-      # is also what a rerun of a delivered run sees — so the 20-hour delivery guard holds across reruns.
+      # is also what a rerun of a delivered run sees — so the once-per-day delivery guard holds across reruns.
       - name: Restore state
         uses: actions/cache/restore@v4
         with:
@@ -79,7 +81,7 @@ jobs:
           restore-keys: |
             arkham-state-
 
-      - name: Decide whether this scheduled invocation is the 08:00 local one
+      - name: Decide whether today's briefing is still owed (at or after 08:00 local, not yet delivered)
         id: gate
         if: github.event_name == 'schedule'
         run: |

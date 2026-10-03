@@ -8,7 +8,6 @@ from arkham.costs import compute_costs, format_cost_report
 from arkham.models import DeliveryStatus, LLMUsage, RunRecord
 from arkham.schedule import (
     github_cron_lines,
-    is_delivery_hour,
     next_run_time,
     should_run,
     utc_hours_for_local_hour,
@@ -32,25 +31,44 @@ def test_utc_hours_and_cron_lines_cover_both_offsets():
     assert utc_hours_for_local_hour(ZoneInfo("Asia/Tokyo"), 8, 2026) == [23]
 
 
-def test_should_run_gate_only_at_local_delivery_hour():
+def _delivered(finished_at: datetime) -> RunRecord:
+    return RunRecord(run_id="r1", mode="scheduled", started_at=finished_at - timedelta(minutes=3), finished_at=finished_at, status="success", delivery_status=DeliveryStatus.SENT)
+
+
+def test_should_run_gate_opens_at_local_delivery_hour_and_stays_open():
     settings = load_settings({}, dotenv_path=None)
     summer_1200_utc = datetime(2026, 7, 1, 12, 5, tzinfo=timezone.utc)  # 08:05 EDT
-    summer_1300_utc = datetime(2026, 7, 1, 13, 5, tzinfo=timezone.utc)  # 09:05 EDT
+    winter_1200_utc = datetime(2026, 1, 15, 12, 5, tzinfo=timezone.utc)  # 07:05 EST — the EDT cron, on time
     winter_1300_utc = datetime(2026, 1, 15, 13, 5, tzinfo=timezone.utc)  # 08:05 EST
     assert should_run(summer_1200_utc, settings, None)[0] is True
-    assert should_run(summer_1300_utc, settings, None)[0] is False
+    assert should_run(winter_1200_utc, settings, None)[0] is False
     assert should_run(winter_1300_utc, settings, None)[0] is True
-    assert is_delivery_hour(winter_1300_utc, NY, 8)
+
+
+def test_should_run_tolerates_scheduler_starting_hours_late():
+    # GitHub starts the 12:00 UTC cron hours late (observed 14:08-21:34 UTC); the briefing is still owed.
+    settings = load_settings({}, dotenv_path=None)
+    for late in (datetime(2026, 10, 3, 15, 20, tzinfo=timezone.utc), datetime(2026, 8, 28, 21, 34, tzinfo=timezone.utc)):
+        ok, reason = should_run(late, settings, None)
+        assert ok, reason
 
 
 def test_should_run_refuses_double_delivery():
     settings = load_settings({}, dotenv_path=None)
-    now = datetime(2026, 7, 1, 12, 5, tzinfo=timezone.utc)
-    last = RunRecord(run_id="r1", mode="scheduled", started_at=now - timedelta(hours=1), finished_at=now - timedelta(minutes=50), status="success", delivery_status=DeliveryStatus.SENT)
-    ok, reason = should_run(now, settings, last)
+    now = datetime(2026, 7, 1, 12, 55, tzinfo=timezone.utc)  # 08:55 EDT
+    ok, reason = should_run(now, settings, _delivered(now - timedelta(minutes=50)))
     assert not ok and "already delivered" in reason
-    old = last.model_copy(update={"finished_at": now - timedelta(hours=23)})
-    assert should_run(now, settings, old)[0]
+    # the second cron of the day, hours after the first one delivered
+    assert not should_run(now + timedelta(hours=5), settings, _delivered(now - timedelta(minutes=50)))[0]
+    assert should_run(now, settings, _delivered(now - timedelta(hours=23)))[0]
+
+
+def test_should_run_after_late_delivery_yesterday():
+    # Yesterday's briefing went out late (17:34 EDT); today's cron starting 16.5h later must still deliver.
+    settings = load_settings({}, dotenv_path=None)
+    yesterday = _delivered(datetime(2026, 8, 28, 21, 34, tzinfo=timezone.utc))
+    ok, reason = should_run(datetime(2026, 8, 29, 14, 8, tzinfo=timezone.utc), settings, yesterday)
+    assert ok, reason
 
 
 def test_costs_unpriced_when_pricing_missing():

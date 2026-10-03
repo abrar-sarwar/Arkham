@@ -265,7 +265,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_hist.add_argument("--limit", type=int, default=15)
     p_hist.set_defaults(func=cmd_history)
 
-    sub.add_parser("should-run", help="exit 0 only if it is the delivery hour and nothing was delivered recently (scheduler gate)").set_defaults(func=cmd_should_run)
+    sub.add_parser("should-run", help="exit 0 only if the delivery hour has passed and today's briefing has not gone out (scheduler gate)").set_defaults(func=cmd_should_run)
     sub.add_parser("next-run", help="print the next delivery time and matching UTC cron lines").set_defaults(func=cmd_next_run)
 
     p_search = sub.add_parser("search", help="search stored events (seed of the future `arkham ask`)")
